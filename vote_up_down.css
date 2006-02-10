@@ -1,0 +1,52 @@
+.node .picture img {
+  float: left;
+  border: 0;
+  margin: 0;
+  padding: 0.3em 0 0.3em 2px;
+  width: 18px;
+  height: 18px:
+}
+
+.vote-up-down-widget {
+  float: left;
+  clear: left;
+  padding: 2px;
+  margin: 2px 5px 2px 0;
+  border: 1px solid #ccc;
+}
+
+.vote-up-down-via {
+  float: right;
+  color: #999;
+  padding-left: 3px;
+}
+
+.vote-up-act, .vote-up-inact, .vote-down-act, .vote-down-inact {
+  display: block;
+  text-decoration: none;
+  width: 15px;
+  height: 16px;
+}
+.vote-up-act {
+  background: url(a_up_act.png) no-repeat 0px 0px;
+}
+.vote-up-inact {
+  background: url(a_up_inact.png) no-repeat 0px 0px;
+}
+.vote-down-act {
+  background: url(a_down_act.png) no-repeat -0px 0px;
+}
+.vote-down-inact {
+  background: url(a_down_inact.png) no-repeat 0px 0px;
+}
+
+.vote-points {
+  font-weight: bold;
+}
+
+.storylink h2, 
+.storylink .content, 
+.storylink .info, 
+.storylink .links {
+  padding-left: 26px;
+}

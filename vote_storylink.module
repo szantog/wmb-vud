@@ -1,0 +1,421 @@
+<?php
+// $Id$
+
+/*
+ * @file
+ * vote_storylink defines a "storylink" node type.
+ * It's based upon "links_weblink.module".
+ */
+
+/**
+ * Implementation of hook_help()
+ */
+function vote_storylink_help($section) {
+  switch ($section) {
+    case 'admin/help#vote_storylink':
+      return t("<p>This module is used to create links to other resources -- websites, pages, documents, etc. Each click on an outgoing link is logged and counted.</p>");
+    case 'admin/modules#description':
+      return t("Creates articles whose main purpose is to catalog a story link");
+    case 'node/add#storylink':
+      return t("A storylink is an article whose main purpose is to catalog a link into a directory, as distinguished from an article of some other type that may or may not have related links. It is possible that a storylink article may <i>also</i> have related links (depending on administrative settings for this site), but the storylink's primary link is a required field that is separate from the optional related links (if any).");
+  }
+}
+
+/**
+ * Implementation of hook_node_info()
+ */
+function vote_storylink_node_info() {
+  return array('storylink' => array('name' => t('story link'), 'base' => 'vote_storylink'));
+}
+
+/**
+ * Implementation of hook_perm
+ */
+function vote_storylink_perm() {
+  return array('create storylinks', 'edit own storylinks');
+}
+
+/**
+ * Implementation of hook_access()
+ */
+function vote_storylink_access($op, $node) {
+  global $user;
+
+  if ($op == 'create') {
+    return user_access('create storylinks');
+  }
+
+  if ($op == 'update' || $op == 'delete') {
+    if (user_access('edit own storylinks') && ($user->uid == $node->uid)) {
+      return TRUE;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_settings()
+ */
+function vote_storylink_settings() {
+  $form = array();
+  if (!module_exist('links')) {
+    drupal_set_message(t('The &quot;links&quot; module is disabled or not installed. storylinks will not function until this is corrected. Check the availability of that module, and enable if needed, in the %modules.',
+      array('%modules' => l(t('modules administration page'), 'admin/modules'))), 'error');
+  }
+
+  $form['link_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Link display settings'),
+    '#description' => t("Other settings for how storylinks behave and how they are displayed are available in the %linksettingspage.",
+      array('%linksettingspage' => l(t('links module settings page'), 'admin/settings/links'))),
+  );
+
+  $form['link_settings']['vote_storylink_display_teaser'] = array(
+    '#type' => 'radios',
+    '#title' => t('Link display for teaser view'),
+    '#default_value' => variable_get('vote_storylink_display_teaser', '1'),
+    '#options' => array(0 => t('Do not display link'), 1 => t('Display link')),
+    '#description' => t('This setting controls whether the clickable link is displayed near the node title (in most themes) for the teaser or listing format.'),
+  );
+
+  $form['link_settings']['vote_storylink_display_full'] = array(
+    '#type' => 'radios',
+    '#title' => t('Link display for full-page view'),
+    '#default_value' => variable_get('vote_storylink_display_full', '1'),
+    '#options' => array(0 => t('Do not display link'), 1 => t('Display link')),
+    '#description' => t('This setting controls how many links are displayed near the node title (in most themes) in full-page displays.'),
+  );
+
+  $form['link_settings']['vote_storylink_display_length'] = array(
+    '#type' => 'select',
+    '#title' => t('Display trim length'),
+    '#default_value' => variable_get('vote_storylink_display_length', '0'),
+    '#options' => array(0 => t('Unlimited'), 20 => 20, 30 => 30, 40 => 40),
+    '#description' => t('Trims the displayed text (but not the actual URL) when the clickable link is displayed near the article title. Does not affect display of the link at the end of the article body.'),
+  );
+
+  $form['link_settings']['vote_storylink_enable_list'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show link at end of body text'),
+    '#return_value' => 1,
+    '#default_value' => variable_get('vote_storylink_enable_list', '1'),
+    '#description' => t('If enabled, the clickable link will be appended to the end of the content, when in full-page display mode.'),
+  );
+
+  $form['link_catalog'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('storylink catalog settings'),
+  );
+
+  $form['link_catalog']['vote_storylink_enable_catalog'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable storylinks directory'),
+    '#return_value' => 1,
+    '#default_value' => variable_get('vote_storylink_enable_catalog', '1'),
+    '#description' => t('If enabled, this module will produce a directory of all storylink nodes, organized by category.'),
+  );
+
+  $form['link_catalog']['vote_storylink_catalog_category_cols'] = array(
+    '#type' => 'select',
+    '#title' => t('Category display columns'),
+    '#default_value' => variable_get('vote_storylink_catalog_category_cols', '2'),
+    '#options' => array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5),
+    '#description' => t('If the storylink catalog is enabled, this setting controls the number of columns in the table of catagories that appears at the top of link catalog pages.'),
+  );
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_menu()
+ */
+function vote_storylink_menu($may_cache) {
+  $items = array();
+
+  if ($may_cache) {
+    $items[] = array(
+      'path' => 'node/add/storylink',
+      'title' => t('story link'),
+      'access' => user_access('create storylinks')
+      );
+    $items[] = array(
+      'path' => 'storylinks',
+      'title' => t('story links'),
+      'callback' => 'vote_storylink_page',
+      'access' => user_access('access content'),
+      'type' => MENU_CALLBACK
+      );
+  }
+
+  return $items;
+}
+
+/**
+ * Menu callback; displays a Drupal page containing recent story links entries.
+ */
+function vote_storylink_page($a = NULL, $b = NULL) {
+
+  if ($a == 'top') {
+    if ($b == 'feed') {
+      return vote_storylink_feed_top();
+    }
+    else {
+      return vote_storylink_page_top();
+    }
+  }
+  elseif ($a == 'new' && $b == 'feed') {
+    return vote_storylink_feed_new();
+  }
+  else {
+    return vote_storylink_page_new();
+  }
+}
+
+/**
+ * Display views of the storylinks
+ */
+function vote_storylink_page_new($a = NULL, $b = NULL) {
+  drupal_set_title(t('new story links') . $a . $b);
+  $sql = db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC");
+  $result = pager_query($sql, '10');
+  while ($node = db_fetch_object($result)) {
+    $output .= node_view(node_load(array('nid' => $node->nid)), 1);
+  }
+  $output .= theme('pager', NULL, '10');
+  $output .= theme('feed_icon', url('storylinks/new/feed'));
+
+  drupal_add_link(array('rel' => 'alternate',
+                        'type' => 'application/rss+xml',
+                        'title' => t('RSS - %title', array('%title' => $title)),
+                        'href' => url('storylinks/new/feed')));
+
+  return $output;
+}
+
+function vote_storylink_page_top() {
+  drupal_set_title(t('popular story links'));
+  $sql = db_rewrite_sql("SELECT n.nid, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC");
+  $result = pager_query($sql, '10');
+  while ($node = db_fetch_object($result)) {
+    $output .= node_view(node_load(array('nid' => $node->nid)), 1);
+  }
+  $output .= theme('pager', NULL, '10');
+  $output .= theme('feed_icon', url('storylinks/top/feed'));
+
+  drupal_add_link(array('rel' => 'alternate',
+                        'type' => 'application/rss+xml',
+                        'title' => t('RSS - %title', array('%title' => $title)),
+                        'href' => url('storylinks/top/feed')));
+
+  return $output;
+}
+
+/**
+ * Displays an RSS feed containing recent blog entries of all users.
+ */
+function vote_storylink_feed_new() {
+  $result = db_query_range(db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC"), 0, variable_get('feed_default_items', 10));
+  $channel['title'] = variable_get('site_name', 'drupal') .' new';
+  $channel['link'] = url('newstorylinks', NULL, NULL, TRUE);
+  $channel['description'] = $term->description;
+  node_feed($result, $channel);
+}
+
+function vote_storylink_feed_top() {
+  $result = db_query_range(db_rewrite_sql("SELECT n.nid, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC"), 0, variable_get('feed_default_items', 10));
+  $channel['title'] = variable_get('site_name', 'drupal') .' popular';
+  $channel['link'] = url('topstorylinks', NULL, NULL, TRUE);
+  $channel['description'] = $term->description;
+  node_feed($result, $channel);
+}
+
+/**
+ * Implementation of hook_form
+ */
+function vote_storylink_form(&$node, &$param) {
+  $vote_storylink = $node->vote_storylink;
+
+  // Allow the url field to be initialized via $_GET (e.g. for use
+  // with a "blog it" bookmarklet):
+  if ($_GET['edit']['url']  && !$vote_storylink[0]['url']) {
+    $story_url = check_url($_GET['edit']['url']);
+  }
+  else {
+    $story_url = $vote_storylink[0]['url'];
+  }
+
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#required' => TRUE,
+    '#default_value' => $node->title,
+    '#maxlength' => 80,
+    '#description' => t("Titel of the story the link goes to, max 80 characters."),
+    '#weight' => -18,
+  );
+
+  $form['vote_storylink_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Story URL'),
+    '#value' => $story_url,
+    '#required' => TRUE,
+    '#description' => t('The URL will be normalized to remove things like session identifiers, which are not a permanent part of the link address.'),
+    '#weight' => -17,
+  );
+
+  $form['body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Description'),
+    '#default_value' => $node->body,
+    '#required' => FALSE,
+    '#rows' => 5,
+    '#maxlength' => 300,
+    '#resizable' => FALSE,
+    '#description' => t('A short description of the story. It should be around 2 to 4 sentences.'),
+    '#weight' => -16,
+  );
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_load
+ */
+function vote_storylink_load($node) {
+  $links = links_load_links_for_node($node->nid, 'vote_storylink', 0, TRUE);
+  return array('vote_storylink_url' => $links[0]['url'], 'vote_storylink' => $links);
+}
+
+/**
+ * Implementation of hook_prepare().
+ */
+function vote_storylink_prepare(&$node) {
+  if (isset($_POST['edit']['vote_storylink_url'])) {
+    $node->vote_storylink_url = $_POST['edit']['vote_storylink_url'];
+  }
+  vote_storylink_node_build($node);
+}
+
+/**
+ * Implementation of hook_validate().
+ */
+function vote_storylink_validate(&$node) {
+  vote_storylink_node_build($node);
+}
+
+/**
+ * Implementation of hook_delete().
+ */
+function vote_storylink_delete(&$node) {
+  // Delete the values from a node that is being erased
+  // Don't care if it's "supposed" to have links -- delete if found anyway
+  vote_storylink_node_build($node);
+  links_delete_links_for_node($node, 'vote_storylink');
+}
+
+/**
+ * Implementation of hook_insert().
+ */
+function vote_storylink_insert(&$node) {
+  vote_storylink_node_build($node);
+  links_save_links_for_node($node, 'vote_storylink');
+}
+
+/**
+ * Implementation of hook_update().
+ */
+function vote_storylink_update(&$node) {
+  vote_storylink_node_build($node);
+  links_save_links_for_node($node, 'vote_storylink');
+}
+
+/**
+ * Implementation of hook_link().
+ */
+function vote_storylink_link($type, $node = NULL, $teaser = FALSE) {
+  $links = array();
+
+  if ($type == 'node') {
+    $links[] = l(t('more'), 'node/'. $node->nid);
+    //return links_get_list('vote_storylink', $node, FALSE, $teaser);
+  }
+
+  return $links;
+}
+
+/**
+ * Implementation of hook_view
+ */
+function vote_storylink_view(&$node, $teaser = FALSE, $page = FALSE) { 
+  if ($teaser || ! intval(variable_get('vote_storylink_enable_list', 0))) {
+    // No changes in teaser mode or if appended link disabled
+    return;
+  }
+  $formatted_links = links_get_list('vote_storylink', $node, $page, $teaser);
+  // We know the array can only have zero or one elements in this module.
+  if (isset($formatted_links[0])) {
+    $append = theme('vote_storylink_append', $formatted_links[0]);
+  }
+  $node->body .= $append;
+  $node = node_prepare($node, $teaser); 
+}
+
+/**
+ * Apply markup to the appended storylink
+ */
+function theme_vote_storylink_append($link_markup) {
+  $output = '<p><ul id="vote_storylink_list"><li>' . $link_markup . '</li></ul>';
+  return $output;
+}
+
+function theme_vote_storylink_via($link_url) {
+  $link_url = parse_url($link_url);
+  $output = '<div class="vote-up-down-via">('. t('via %domain ', array('%domain' => $link_url['host'])) . ')</div>';
+  return $output;
+}
+
+/**
+ * To use the links API, we sometimes need to populate the internal data
+ * structure $node->vote_storylink, which is an array of link-definition
+ * arrays. In this case, the outer array always contains exactly one element
+ * because we are interested only in the primary URL for the storylink. If
+ * this site allows "related links" for storylink nodes, that's handled
+ * by the links_related module, not here.
+ */
+function vote_storylink_node_build(&$node, $url='') {
+  if (empty($url)) {
+    $url = links_normalize_url($node->vote_storylink_url);
+  } else {
+    $url = links_normalize_url($url);
+  }
+  $node->vote_storylink_url = $url;
+  $link = array(
+    'url' => $url,
+    'link_title' => $node->title,
+    'weight' => 0,
+  );
+  // Wrap $link as the [0] element of a trivial outer array.
+  $node->vote_storylink = array($link);
+}
+
+/**
+ * Create the form for the node. It's similar to the form for links_related
+ * but allows (and in fact requires) only one link. Note that it's possible
+ * to enable the "storylink" node type for "related links" in addition to the
+ * special link that is a requirement. The only difference is the $module
+ * parameter when we save the link to the database.
+ */
+function vote_storylink_form_alter($form_id, &$form) {
+  $type = $form['type']['#value'];
+  switch ($form_id) {
+    case $type .'_node_form':
+      // The actual node edit form. This allows the users to enter the
+      // links_related into appropriate node types' edit screens.
+      $node = $form['#node'];
+      $link = $node->vote_storylink;
+      $link['url'] = links_normalize_url($link['url']);
+    break;
+  }
+  return;
+}
+
+?>

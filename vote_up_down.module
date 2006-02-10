@@ -1,0 +1,220 @@
+<?php
+/* $Id$ */
+
+/**
+ * @file
+ * vote_up_down is a module that adds a widget for +1/-1 votes on nodes.
+ * It depends upon Voting API.
+ * It's based upon "simplevote.module".
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function vote_up_down_help($section) {
+  switch ($section) {
+    case 'admin/modules#description':
+      return t('Adds a up/down vote widget to selected node types.');
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function vote_up_down_perm() {
+  return array ('view up-down vote', 'use up-down vote');
+}
+
+/**
+ * Implementation of hook_settings().
+ */
+function vote_up_down_settings() {
+
+  foreach(node_get_types() as $type => $name) {
+    $options[$type] = $name;
+  }
+
+  $form['vote_node_types'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Node types'),
+  );
+  $form['vote_node_types']['vote_up_down_node_types'] = array(
+    '#type' => 'select',
+    '#title' => t('Enable voting for these node types'),
+    '#default_value' => variable_get('vote_up_down_node_types', array()),
+    '#options' => $options,
+    '#multiple' => TRUE,
+  );
+
+  $form['vote_widget_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Widget settings'),
+  );
+  $form['vote_widget_settings']['vote_up_down_widget_teaser'] = array(
+    '#type' => 'radios',
+    '#title' => t('Vote widget display for teaser view'),
+    '#default_value' => variable_get('vote_up_down_widget_teaser', '1'),
+    '#options' => array(0 => t('Do not display widget'), 1 => t('Display widget')),
+  );
+  $form['vote_widget_settings']['vote_up_down_widget_page'] = array(
+    '#type' => 'radios',
+    '#title' => t('Vote widget display for full-page view'),
+    '#default_value' => variable_get('vote_up_down_widget_page', '1'),
+    '#options' => array(0 => t('Do not display widget'), 1 => t('Display widget')),
+  );
+
+  $form['link_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Link display settings'),
+  );
+  $form['link_settings']['vote_up_down_link_teaser'] = array(
+    '#type' => 'radios',
+    '#title' => t('Link display of vote pints for teaser view'),
+    '#default_value' => variable_get('vote_up_down_link_teaser', '1'),
+    '#options' => array(0 => t('Do not display link'), 1 => t('Display link')),
+  );
+  $form['link_settings']['vote_up_down_link_page'] = array(
+    '#type' => 'radios',
+    '#title' => t('Link display of vote pints for full-page view'),
+    '#default_value' => variable_get('vote_up_down_link_page', '1'),
+    '#options' => array(0 => t('Do not display link'), 1 => t('Display link')),
+  );
+
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function vote_up_down_menu($may_cache) {
+  global $base_path;
+
+  $items = array();
+
+  if ($may_cache) {
+    $items[] = array(
+      'path' => 'vote',
+      'title' => t('vote on content'),
+      'callback' => 'vote_up_down_vote',
+      'access' => user_access('use up-down vote'),
+      'type' => MENU_CALLBACK
+      );
+  }
+  else {
+      drupal_set_html_head(theme('stylesheet_import', $base_path . drupal_get_path('module', 'vote_up_down') . '/vote_up_down.css'));
+  }
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_link().
+ */
+function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
+  $links = array();
+
+  $node_type = in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE);
+
+  if ($type == 'node' && $node_type && user_access('view up-down vote')) {
+    if ($teaser) {
+      $links_display = variable_get('vote_up_down_link_teaser', '1');
+    }
+    else {
+      $links_display = variable_get('vote_up_down_link_page', '1');
+    }
+  }
+
+  if ($links_display) {
+    $links[] = _vote_up_down_points($node->nid, $type);
+  }
+
+  return $links;
+}
+
+function vote_up_down_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+  switch ($op) {
+    case 'view':
+      $node_type = in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE);
+      if ($node_type) {
+        if($teaser && variable_get('vote_up_down_widget_teaser', '1') == '1'){
+          $node->teaser = theme('vote_up_down_widget', $node->nid, 'node') . $node->teaser;
+        }
+        elseif (variable_get('vote_up_down_widget_page', '1') == '1') {
+          $node->body = theme('vote_up_down_widget', $node->nid, 'node') . $node->body;
+        }
+      }
+      break;
+  }
+}
+
+function vote_up_down_vote($type, $cid, $value) {
+  // sanity-check the incoming values.
+  if (is_numeric($cid) && is_numeric($value)) {
+    if ($value > 0) {
+      $vote->value = 1;
+    }
+    else {
+      $vote->value = -1;
+    }
+
+    $vote->value_type = VOTINGAPI_VALUE_TYPE_TOKEN;
+    $vote->tag = VOTINGAPI_VALUE_DEFAULT_TAG;
+
+    votingapi_set_vote($type, $cid, $vote);
+  }
+
+  drupal_goto(drupal_get_destination());
+}
+
+function theme_vote_up_down_widget($cid, $type) {
+  global $user;
+
+  if (user_access('view up-down vote')) {
+
+    $output = '<div class="vote-up-down-widget">';
+
+    if (user_access('use up-down vote') && $user->uid) {
+      $user_vote = votingapi_get_user_votes($type, $cid);
+
+      if ($user_vote[0]->value > 0) {
+        $class = 'vote-up-act';
+        $class2 = 'vote-down-inact';
+      }
+      else if ($user_vote[0]->value < 0) {
+        $class = 'vote-up-inact';
+        $class2 = 'vote-down-act';
+      }
+      else {
+        $class = 'vote-up-inact';
+        $class2 = 'vote-down-inact';
+      }
+
+      $output .= l('', 'vote/' . $type . '/' . $cid . '/1', array('class' => $class, 'title' => t('Vote up')), drupal_get_destination(), NULL, FALSE, TRUE);
+      $output .= l('', 'vote/' . $type . '/' . $cid . '/0', array('class' => $class2, 'title' => t('Vote down')), drupal_get_destination(), NULL, FALSE, TRUE);
+    }
+    else {
+      $output .= '<span class="vote-up-inact" title="'. t('You must login to vote.') .'"></span>';
+      $output .= '<span class="vote-down-inact" title="'. t('You must login to vote.') .'"></span>';
+    }
+
+    $output .= '</div>';
+
+    return $output;
+  }
+}
+
+function _vote_up_down_points($cid, $type) {
+  $all_vote = votingapi_get_voting_result($type, $cid, VOTINGAPI_VALUE_TYPE_TOKEN, VOTINGAPI_VALUE_DEFAULT_TAG, 'sum');
+  if ($all_vote) {
+    $output = '<span class="vote-points">'. format_plural($all_vote->value, '1 point', '%count points') .'</span>';
+  }
+  else {
+    $output = '<span class="vote-points">'. t('0 points') .'</span>';
+  }
+
+  return $output;
+}
+
+?>
