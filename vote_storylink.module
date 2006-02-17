@@ -334,7 +334,7 @@ function vote_storylink_update(&$node) {
 function vote_storylink_link($type, $node = NULL, $teaser = FALSE) {
   $links = array();
 
-  if ($type == 'node') {
+  if ($type == 'node' && $node->type == 'storylink') {
     $links[] = l(t('more'), 'node/'. $node->nid);
     //return links_get_list('vote_storylink', $node, FALSE, $teaser);
   }
