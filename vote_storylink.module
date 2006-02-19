@@ -53,79 +53,6 @@ function vote_storylink_access($op, $node) {
 }
 
 /**
- * Implementation of hook_settings()
- */
-function vote_storylink_settings() {
-  $form = array();
-  if (!module_exist('links')) {
-    drupal_set_message(t('The &quot;links&quot; module is disabled or not installed. storylinks will not function until this is corrected. Check the availability of that module, and enable if needed, in the %modules.',
-      array('%modules' => l(t('modules administration page'), 'admin/modules'))), 'error');
-  }
-
-  $form['link_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Link display settings'),
-    '#description' => t("Other settings for how storylinks behave and how they are displayed are available in the %linksettingspage.",
-      array('%linksettingspage' => l(t('links module settings page'), 'admin/settings/links'))),
-  );
-
-  $form['link_settings']['vote_storylink_display_teaser'] = array(
-    '#type' => 'radios',
-    '#title' => t('Link display for teaser view'),
-    '#default_value' => variable_get('vote_storylink_display_teaser', '1'),
-    '#options' => array(0 => t('Do not display link'), 1 => t('Display link')),
-    '#description' => t('This setting controls whether the clickable link is displayed near the node title (in most themes) for the teaser or listing format.'),
-  );
-
-  $form['link_settings']['vote_storylink_display_full'] = array(
-    '#type' => 'radios',
-    '#title' => t('Link display for full-page view'),
-    '#default_value' => variable_get('vote_storylink_display_full', '1'),
-    '#options' => array(0 => t('Do not display link'), 1 => t('Display link')),
-    '#description' => t('This setting controls how many links are displayed near the node title (in most themes) in full-page displays.'),
-  );
-
-  $form['link_settings']['vote_storylink_display_length'] = array(
-    '#type' => 'select',
-    '#title' => t('Display trim length'),
-    '#default_value' => variable_get('vote_storylink_display_length', '0'),
-    '#options' => array(0 => t('Unlimited'), 20 => 20, 30 => 30, 40 => 40),
-    '#description' => t('Trims the displayed text (but not the actual URL) when the clickable link is displayed near the article title. Does not affect display of the link at the end of the article body.'),
-  );
-
-  $form['link_settings']['vote_storylink_enable_list'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show link at end of body text'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('vote_storylink_enable_list', '1'),
-    '#description' => t('If enabled, the clickable link will be appended to the end of the content, when in full-page display mode.'),
-  );
-
-  $form['link_catalog'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('storylink catalog settings'),
-  );
-
-  $form['link_catalog']['vote_storylink_enable_catalog'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable storylinks directory'),
-    '#return_value' => 1,
-    '#default_value' => variable_get('vote_storylink_enable_catalog', '1'),
-    '#description' => t('If enabled, this module will produce a directory of all storylink nodes, organized by category.'),
-  );
-
-  $form['link_catalog']['vote_storylink_catalog_category_cols'] = array(
-    '#type' => 'select',
-    '#title' => t('Category display columns'),
-    '#default_value' => variable_get('vote_storylink_catalog_category_cols', '2'),
-    '#options' => array(1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5),
-    '#description' => t('If the storylink catalog is enabled, this setting controls the number of columns in the table of catagories that appears at the top of link catalog pages.'),
-  );
-
-  return $form;
-}
-
-/**
  * Implementation of hook_menu()
  */
 function vote_storylink_menu($may_cache) {
@@ -176,11 +103,11 @@ function vote_storylink_page($a = NULL, $b = NULL) {
 function vote_storylink_page_new($a = NULL, $b = NULL) {
   drupal_set_title(t('new story links') . $a . $b);
   $sql = db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC");
-  $result = pager_query($sql, '10');
+  $result = pager_query($sql, variable_get('default_nodes_main', 10));
   while ($node = db_fetch_object($result)) {
     $output .= node_view(node_load(array('nid' => $node->nid)), 1);
   }
-  $output .= theme('pager', NULL, '10');
+  $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url('storylinks/new/feed'));
 
   drupal_add_link(array('rel' => 'alternate',
@@ -194,11 +121,11 @@ function vote_storylink_page_new($a = NULL, $b = NULL) {
 function vote_storylink_page_top() {
   drupal_set_title(t('popular story links'));
   $sql = db_rewrite_sql("SELECT n.nid, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC");
-  $result = pager_query($sql, '10');
+  $result = pager_query($sql, variable_get('default_nodes_main', 10));
   while ($node = db_fetch_object($result)) {
     $output .= node_view(node_load(array('nid' => $node->nid)), 1);
   }
-  $output .= theme('pager', NULL, '10');
+  $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url('storylinks/top/feed'));
 
   drupal_add_link(array('rel' => 'alternate',
