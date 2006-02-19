@@ -1,11 +1,13 @@
-.node .picture img {
-  float: left;
-  border: 0;
-  margin: 0;
-  padding: 0.3em 0 0.3em 2px;
-  width: 18px;
-  height: 18px:
-}
+.storylink .picture img {
+  float: left !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0.3em 0 0.3em 2px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  _width: 18px !important;
+  _height: 18px !important;
+} /* Fixing IE6 bug, a underscore before a attribute make other browsers ignore it */
 
 .vote-up-down-widget {
   float: left;
