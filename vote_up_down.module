@@ -31,25 +31,22 @@ function vote_up_down_perm() {
  */
 function vote_up_down_settings() {
 
-  foreach(node_get_types() as $type => $name) {
-    $options[$type] = $name;
-  }
-
   $form['vote_node_types'] = array(
     '#type' => 'fieldset',
     '#title' => t('Node types'),
+    '#description' => t('A list of node types you want to activate voting on.'),
   );
   $form['vote_node_types']['vote_up_down_node_types'] = array(
-    '#type' => 'select',
-    '#title' => t('Enable voting for these node types'),
+    '#type' => 'checkboxes',
+    '#title' => t('Types'),
     '#default_value' => variable_get('vote_up_down_node_types', array()),
-    '#options' => $options,
-    '#multiple' => TRUE,
+    '#options' => node_get_types(),
   );
 
   $form['vote_widget_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
+    '#description' => t('For more control over the voting widget placement it can be inserted directly in the theme, see the included node-storylink.tpl.php for an example. When this metod is used turn of the widget display here.'),
   );
   $form['vote_widget_settings']['vote_up_down_widget_teaser'] = array(
     '#type' => 'radios',
@@ -95,7 +92,7 @@ function vote_up_down_menu($may_cache) {
 
   if ($may_cache) {
     $items[] = array(
-      'path' => 'vote',
+      'path' => 'vote_up_down',
       'title' => t('vote on content'),
       'callback' => 'vote_up_down_vote',
       'access' => user_access('use up-down vote'),
@@ -159,8 +156,8 @@ function vote_up_down_vote($type, $cid, $value) {
       $vote->value = -1;
     }
 
-    $vote->value_type = VOTINGAPI_VALUE_TYPE_TOKEN;
-    $vote->tag = VOTINGAPI_VALUE_DEFAULT_TAG;
+    $vote->value_type = 'points';
+    $vote->tag = 'vote';
 
     votingapi_set_vote($type, $cid, $vote);
   }
@@ -191,8 +188,8 @@ function theme_vote_up_down_widget($cid, $type) {
         $class2 = 'vote-down-inact';
       }
 
-      $output .= l('', 'vote/' . $type . '/' . $cid . '/1', array('class' => $class, 'title' => t('Vote up')), drupal_get_destination(), NULL, FALSE, TRUE);
-      $output .= l('', 'vote/' . $type . '/' . $cid . '/0', array('class' => $class2, 'title' => t('Vote down')), drupal_get_destination(), NULL, FALSE, TRUE);
+      $output .= l('', 'vote_up_down/' . $type . '/' . $cid . '/1', array('class' => $class, 'title' => t('Vote up')), drupal_get_destination(), NULL, FALSE, TRUE);
+      $output .= l('', 'vote_up_down/' . $type . '/' . $cid . '/0', array('class' => $class2, 'title' => t('Vote down')), drupal_get_destination(), NULL, FALSE, TRUE);
     }
     else {
       $output .= '<span class="vote-up-inact" title="'. t('You must login to vote.') .'"></span>';
@@ -206,7 +203,7 @@ function theme_vote_up_down_widget($cid, $type) {
 }
 
 function _vote_up_down_points($cid, $type) {
-  $all_vote = votingapi_get_voting_result($type, $cid, VOTINGAPI_VALUE_TYPE_TOKEN, VOTINGAPI_VALUE_DEFAULT_TAG, 'sum');
+  $all_vote = votingapi_get_voting_result($type, $cid, 'points', 'vote', 'sum');
   if ($all_vote) {
     $output = '<span class="vote-points">'. format_plural($all_vote->value, '1 point', '%count points') .'</span>';
   }
