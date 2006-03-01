@@ -1,6 +1,6 @@
 
 <!-- start node -->
-<div class="node storylink<?php print ($sticky) ? " sticky" : ""; ?>">
+<div class="node storylink<?php print ($sticky) ? ' sticky' : ''; ?>">
 <?php print $picture ?>
 <h2><a href="<?php print $node->vote_storylink_url ?>"><?php print $title ?></a></h2>
 <?php print theme('vote_storylink_via', $node->vote_storylink_url); ?>
@@ -16,5 +16,5 @@
 <?php if ($links): ?>
 <div class="links"><?php print $links ?></div>
 <?php endif; ?>
-<br class='clear' />
+<br class="clear" />
 </div>

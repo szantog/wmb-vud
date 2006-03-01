@@ -29,14 +29,14 @@
   width: 15px;
   height: 16px;
 }
-.vote-up-act {
+.vote-up-act, a.vote-up-inact:hover {
   background: url(a_up_act.png) no-repeat 0px 0px;
 }
 .vote-up-inact {
   background: url(a_up_inact.png) no-repeat 0px 0px;
 }
-.vote-down-act {
-  background: url(a_down_act.png) no-repeat -0px 0px;
+.vote-down-act, a.vote-down-inact:hover {
+  background: url(a_down_act.png) no-repeat 0px 0px;
 }
 .vote-down-inact {
   background: url(a_down_inact.png) no-repeat 0px 0px;
