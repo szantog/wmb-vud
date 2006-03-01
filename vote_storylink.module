@@ -249,10 +249,10 @@ function vote_storylink_form(&$node, &$param) {
 
   $form['vote_storylink_url'] = array(
     '#type' => 'textfield',
-    '#title' => t('Story URL'),
+    '#title' => t('URL'),
     '#value' => $story_url,
     '#required' => TRUE,
-    '#description' => t('The URL will be normalized to remove things like session identifiers, which are not a permanent part of the link address.'),
+    '#description' => t('The URL/address of the story.'),
     '#weight' => -17,
   );
 
