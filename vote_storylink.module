@@ -175,7 +175,7 @@ function vote_storylink_prepare(&$node) {
   elseif ($_GET['edit']['url']) {
     $node->vote_storylink_url = check_url($_GET['edit']['url']);;
   }
-  else {
+  elseif (empty($node->vote_storylink_url)) {
     $node->vote_storylink_url = 'http://';
   }
   vote_storylink_node_build($node);
@@ -261,8 +261,8 @@ function vote_storylink_page($a = NULL, $b = NULL) {
 /**
  * Display views of the storylinks
  */
-function vote_storylink_page_new($a = NULL, $b = NULL) {
-  drupal_set_title(t('new story links') . $a . $b);
+function vote_storylink_page_new() {
+  drupal_set_title(t('new story links'));
   $sql = db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC");
   $result = pager_query($sql, variable_get('default_nodes_main', 10));
   while ($node = db_fetch_object($result)) {
@@ -293,6 +293,24 @@ function vote_storylink_page_top() {
                         'type' => 'application/rss+xml',
                         'title' => t('RSS - %title', array('%title' => $title)),
                         'href' => url('storylink/top/feed')));
+
+  return $output;
+}
+
+function vote_storylink_page_week_top() {
+  drupal_set_title(t('popular story links this week'));
+  $sql = db_rewrite_sql("SELECT n.nid, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC");
+  $result = pager_query($sql, variable_get('default_nodes_main', 10));
+  while ($node = db_fetch_object($result)) {
+    $output .= node_view(node_load($node->nid), 1);
+  }
+  $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
+  $output .= theme('feed_icon', url('storylink/top/week/feed'));
+
+  drupal_add_link(array('rel' => 'alternate',
+                        'type' => 'application/rss+xml',
+                        'title' => t('RSS - %title', array('%title' => $title)),
+                        'href' => url('storylink/top/week/feed')));
 
   return $output;
 }
