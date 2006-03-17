@@ -31,6 +31,7 @@ function user_navigation_block($op = 'list', $delta = 0) {
     global $user;
     if ($user->uid) {
       $items = array();
+      $items[] = l(t('submit new story'), 'node/add/storylink');
       $items[] = l(t('my account'), 'user/'. $user->uid);
       $items[] = l(t('my posts'), 'storylink/'. $user->uid);
       $items[] = l(t('log out'), 'logout');
