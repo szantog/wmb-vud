@@ -10,12 +10,16 @@ Overview:
 These two modules is a attempt to build a digg.com/reddit.com clone
 for Drupal. They build upon a number of other module, se below.
 
+AJAX functionality is used for voting if the browser supports it
+(using drupal.js included in Druapl 4.7).
+
 This is not a point and click solution. This project provide the
 missing pieces but you need to put them all together.
 
 * vote_up_down.module - Provides a widget for user to vote up/down (+1/-1) for a node.
 * vote_storylink.module - Provides a node type suitable for links to storys
 * node-storylink.tpl.php - PHPTemplate theming of storylinks
+* template.php - PHPTemplate theming of storylinks
 * vote_up_down.css - Adds som css style to the above files.
 * user_navigation.module - Replacement user navigation block.
 
@@ -51,6 +55,7 @@ To be able to automatically promote storylinks that have a specified
 number of votes to the front page you also need to install: 
 * Actions http://drupal.org/project/actions
 * Voting Actions http://drupal.org/node/46895
+  (cvs version after 2006-03-02 of Voting Actions)
 
 Installation is as simple as creating a directory named 
 'vote_up_down' in your 'modules' directory and
@@ -64,8 +69,11 @@ For configuration options go to 'administer >> settings
 Theme story links:
 -----------------
 If you use a PHPTemplate theme you can theme storylinks nodes with a
-"node-storylink.tpl.php" file. Place it in the folder of your theme.
-An example is included that is styled with the css file "vote_up_down.css".
+"node-storylink.tpl.php" file.
+
+An example "node-storylink.tpl.php" and "template.php" is included.
+Place them in the folder of your theme. The examples are styled with the
+css file "vote_up_down.css" in the vote_up_down module folder.
 
 The example include these functions:
 * Make the title an external link to the submitted story.
