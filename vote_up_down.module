@@ -86,8 +86,6 @@ function vote_up_down_settings() {
  * Implementation of hook_menu().
  */
 function vote_up_down_menu($may_cache) {
-  global $base_path;
-
   $items = array();
 
   if ($may_cache) {
@@ -98,9 +96,17 @@ function vote_up_down_menu($may_cache) {
       'access' => user_access('use up-down vote'),
       'type' => MENU_CALLBACK
       );
+    $items[] = array(
+      'path' => 'ajax_vote_up_down',
+      'title' => t('vote on content (ajax)'),
+      'callback' => 'vote_up_down_ajax_handler',
+      'access' => user_access('use up-down vote'),
+      'type' => MENU_CALLBACK
+     );
   }
   else {
-      drupal_set_html_head(theme('stylesheet_import', $base_path . drupal_get_path('module', 'vote_up_down') . '/vote_up_down.css'));
+    theme_add_style(drupal_get_path('module', 'vote_up_down') . '/vote_up_down.css');
+    drupal_add_js(drupal_get_path('module', 'vote_up_down') . '/ajax_vote_up_down.js');
   }
 
   return $items;
@@ -165,6 +171,43 @@ function vote_up_down_vote($type, $cid, $value) {
   drupal_goto(drupal_get_destination());
 }
 
+/**
+ * An ajax voting get handler
+ *
+ * Params passed by url:
+ * @param $type
+ *   A string identifying the type of content whose votes are being retrieved. Node, comment, aggregator item, etc.
+ * @param $tag
+ *   Tag defining vote criteria.
+ * @param $id
+ *   Element (node, comment) id.
+ * @param $score
+ *   Score of the vote cast.
+ * @return
+ *   String containing an Updated score (via print)
+ */
+function vote_up_down_ajax_handler($type, $cid, $value) {
+  // sanity-check the incoming values.
+  if (is_numeric($cid) && is_numeric($value)) {
+    if ($value > 0) {
+      $vote->value = 1;
+    }
+    else {
+      $vote->value = -1;
+    }
+
+    $vote->value_type = 'points';
+    $vote->tag = 'vote';
+
+    votingapi_set_vote($type, $cid, $vote);
+  }
+
+  // send the results back
+  print _vote_up_down_points($cid, $type);
+
+  exit();
+}
+
 function theme_vote_up_down_widget($cid, $type) {
   global $user;
 
@@ -188,12 +231,12 @@ function theme_vote_up_down_widget($cid, $type) {
         $class2 = 'vote-down-inact';
       }
 
-      $output .= l('', 'vote_up_down/' . $type . '/' . $cid . '/1', array('class' => $class, 'title' => t('Vote up')), drupal_get_destination(), NULL, FALSE, TRUE);
-      $output .= l('', 'vote_up_down/' . $type . '/' . $cid . '/0', array('class' => $class2, 'title' => t('Vote down')), drupal_get_destination(), NULL, FALSE, TRUE);
+      $output .= '<span id="vote_up_'. $cid .'" class="'. $class .'" title="'. url("ajax_vote_up_down/$type/$cid/1") .'">'. l('', "vote_up_down/$type/$cid/1", array('class' => $class, 'title' => t('Vote up')), drupal_get_destination(), NULL, FALSE, TRUE) .'</span>';
+      $output .= '<span id="vote_down_'. $cid .'" class="'. $class2 .'" title="'. url("ajax_vote_up_down/$type/$cid/0") .'">'. l('', "vote_up_down/$type/$cid/0", array('class' => $class2, 'title' => t('Vote down')), drupal_get_destination(), NULL, FALSE, TRUE) .'</span>';
     }
     else {
-      $output .= '<span class="vote-up-inact" title="'. t('You must login to vote.') .'"></span>';
-      $output .= '<span class="vote-down-inact" title="'. t('You must login to vote.') .'"></span>';
+      $output .= '<span class="up-inact" title="'. t('You must login to vote.') .'"></span>';
+      $output .= '<span class="down-inact" title="'. t('You must login to vote.') .'"></span>';
     }
 
     $output .= '</div>';
@@ -203,12 +246,12 @@ function theme_vote_up_down_widget($cid, $type) {
 }
 
 function _vote_up_down_points($cid, $type) {
-  $all_vote = votingapi_get_voting_result($type, $cid, 'points', 'vote', 'sum');
-  if ($all_vote) {
-    $output = '<span class="vote-points">'. format_plural($all_vote->value, '1 point', '%count points') .'</span>';
+  $vote_result = votingapi_get_voting_result($type, $cid, 'points', 'vote', 'sum');
+  if ($vote_result) {
+    $output = '<span id="vote_points_'. $cid .'" class="vote-points">'. format_plural($vote_result->value, '1 point', '%count points') .'</span>';
   }
   else {
-    $output = '<span class="vote-points">'. t('0 points') .'</span>';
+    $output = '<span id="vote_points_'. $cid .'" class="vote-points">'. t('0 points') .'</span>';
   }
 
   return $output;

@@ -8,7 +8,6 @@
   _width: 18px !important;
   _height: 18px !important;
 } /* Fixing IE6 bug, a underscore before a attribute make other browsers ignore it */
-
 .vote-up-down-widget {
   float: left;
   clear: left;
@@ -16,36 +15,38 @@
   margin: 2px 5px 2px 0;
   border: 1px solid #ccc;
 }
-
 .vote-up-down-via {
   float: right;
   color: #999;
   padding-left: 3px;
 }
-
-.vote-up-act, .vote-up-inact, .vote-down-act, .vote-down-inact {
+.vote-up-act, .vote-up-inact, .vote-down-act, .vote-down-inact, .up-inact, .down-inact {
   display: block;
   text-decoration: none;
   width: 15px;
   height: 16px;
 }
-.vote-up-act, a.vote-up-inact:hover {
+a.vote-up-inact, a.vote-down-inact, span.vote-up-inact, span.vote-down-inact {
+  cursor: pointer;
+}
+a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
+  cursor: default;
+}
+.vote-up-act, .vote-up-inact:hover {
   background: url(a_up_act.png) no-repeat 0px 0px;
 }
-.vote-up-inact {
+.vote-up-inact, .up-inact {
   background: url(a_up_inact.png) no-repeat 0px 0px;
 }
-.vote-down-act, a.vote-down-inact:hover {
+.vote-down-act, .vote-down-inact:hover {
   background: url(a_down_act.png) no-repeat 0px 0px;
 }
-.vote-down-inact {
+.vote-down-inact, .down-inact {
   background: url(a_down_inact.png) no-repeat 0px 0px;
 }
-
 .vote-points {
   font-weight: bold;
 }
-
 .storylink h2, 
 .storylink .content, 
 .storylink .info, 
