@@ -13,11 +13,11 @@
 function vote_storylink_help($section) {
   switch ($section) {
     case 'admin/help#vote_storylink':
-      return t("<p>This module is used to create links to other resources -- websites, pages, documents, etc. Each click on an outgoing link is logged and counted.</p>");
+      return t("<p>This module is used to create articles that links to other resources -- websites, pages, documents, etc.</p>");
     case 'admin/modules#description':
-      return t("Creates articles whose main purpose is to catalog a story link");
+      return t("Enables the creation of articles that links to websites, pages, documents, etc.");
     case 'node/add#storylink':
-      return t("A storylink is an article whose main purpose is to catalog a link into a directory, as distinguished from an article of some other type that may or may not have related links. It is possible that a storylink article may <i>also</i> have related links (depending on administrative settings for this site), but the storylink's primary link is a required field that is separate from the optional related links (if any).");
+      return t("A story link is an article whose main purpose is to create links to other resources -- websites, pages, documents, etc.");
   }
 }
 
