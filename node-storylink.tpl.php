@@ -2,7 +2,7 @@
 <!-- start node -->
 <div class="node storylink<?php print ($sticky) ? ' sticky' : ''; ?>">
 <?php print $picture ?>
-<h2><a href="<?php print $node->vote_storylink_url ?>"><?php print $title ?></a></h2>
+<h2><a href="<?php print $storylink_url ?>"><?php print ($seqid) ? $seqid .'. ' : '' ?><?php print $title ?></a></h2>
 <?php print $vote_storylink_via ?>
 <?php print $vote_up_down_widget ?>
 <div class="content">
@@ -16,5 +16,5 @@
 <?php if ($links): ?>
 <div class="links">&raquo; <?php print $links ?></div>
 <?php endif; ?>
-<br class='clear' />
+<br class="clear" />
 </div>

@@ -169,6 +169,14 @@ function vote_storylink_load($node) {
  * Implementation of hook_prepare().
  */
 function vote_storylink_prepare(&$node) {
+  // Allow the following fields to be initialized via $_GET (e.g. for use
+  // with a "blog it" bookmarklet):
+  foreach (array('title', 'body') as $field) {
+    if ($_GET['edit'][$field]) {
+      $node->$field = $_GET['edit'][$field];
+    }
+  }
+
   if (isset($_POST['edit']['vote_storylink_url'])) {
     $node->vote_storylink_url = $_POST['edit']['vote_storylink_url'];
   }
@@ -393,8 +401,7 @@ function theme_vote_storylink_via($link_url) {
  */
 function _vote_storylink_valid_url($formelement, $fieldname) {
   $url = $formelement['#value'];
-  $valid = preg_match('|^http(s)?://[a-z0-9-]+(\.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i', $url);
-  if (!$valid) {
+  if (!preg_match('/^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}((:[0-9]{1,5})?\/.*)?$/i', $url)) {
     form_set_error($fieldname, t('The URL is not valid.'));
   }
 }
