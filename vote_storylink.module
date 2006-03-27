@@ -193,7 +193,6 @@ function vote_storylink_prepare(&$node) {
  * Implementation of hook_validate().
  */
 function vote_storylink_validate(&$node) {
-  node_validate_title($node);
   vote_storylink_node_build($node);
 }
 
