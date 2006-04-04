@@ -23,7 +23,7 @@ function vote_up_down_help($section) {
  * Implementation of hook_perm().
  */
 function vote_up_down_perm() {
-  return array ('view up-down vote', 'use up-down vote');
+  return array ('view up-down vote', 'use up-down vote', 'administer up-down vote');
 }
 
 /**
@@ -46,7 +46,7 @@ function vote_up_down_settings() {
   $form['vote_widget_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
-    '#description' => t('For more control over the voting widget placement it can be inserted directly in the theme, see the included node-storylink.tpl.php for an example. When this metod is used turn of the widget display here.'),
+    '#description' => t('For more control over the voting widget placement it can be inserted directly in the theme, see the included node-storylink.tpl.php for an example. When this metod is used turn off the widget display here.'),
   );
   $form['vote_widget_settings']['vote_up_down_widget_teaser'] = array(
     '#type' => 'radios',
@@ -58,6 +58,12 @@ function vote_up_down_settings() {
     '#type' => 'radios',
     '#title' => t('Vote widget display for full-page view'),
     '#default_value' => variable_get('vote_up_down_widget_page', 1),
+    '#options' => array(0 => t('Do not display widget'), 1 => t('Display widget')),
+  );
+  $form['vote_widget_settings']['vote_up_down_widget_comment'] = array(
+    '#type' => 'radios',
+    '#title' => t('Vote widget display for comments'),
+    '#default_value' => variable_get('vote_up_down_widget_comment', 1),
     '#options' => array(0 => t('Do not display widget'), 1 => t('Display widget')),
   );
 
@@ -75,6 +81,12 @@ function vote_up_down_settings() {
     '#type' => 'radios',
     '#title' => t('Link display of vote pints for full-page view'),
     '#default_value' => variable_get('vote_up_down_link_page', 1),
+    '#options' => array(0 => t('Do not display link'), 1 => t('Display link')),
+  );
+  $form['link_settings']['vote_up_down_link_comment'] = array(
+    '#type' => 'radios',
+    '#title' => t('Link display of vote pints for comments'),
+    '#default_value' => variable_get('vote_up_down_link_comment', 1),
     '#options' => array(0 => t('Do not display link'), 1 => t('Display link')),
   );
 
@@ -95,21 +107,122 @@ function vote_up_down_menu($may_cache) {
       'callback' => 'vote_up_down_vote',
       'access' => user_access('use up-down vote'),
       'type' => MENU_CALLBACK
-      );
+    );
     $items[] = array(
       'path' => 'ajax_vote_up_down',
       'title' => t('vote on content (ajax)'),
       'callback' => 'vote_up_down_ajax_handler',
       'access' => user_access('use up-down vote'),
       'type' => MENU_CALLBACK
-     );
+    );
   }
   else {
+    $items[] = array(
+      'path' => 'admin/vote_up_down',
+      'title' => t('vote up/down'),
+      'callback' => 'vote_up_down_page',
+      'access' => user_access('administer up-down vote'),
+    );
+    $items[] = array(
+      'path' => 'admin/vote_up_down/user_votes',
+      'title' => t('user votes'),
+      'callback' => 'vote_up_down_page',
+      'access' => user_access('administer up-down vote'),
+    );
+    if (arg(0) == 'node' && is_numeric(arg(1))) {
+      $node = node_load(arg(1));
+      $vote_access = (user_access('administer up-down vote') && in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE));
+      $items[] = array(
+        'path' => 'node/'. arg(1) .'/votes',
+        'title' => t('votes'),
+        'callback' => 'vote_up_down_tracker',
+        'access' => $vote_access,
+        'weight' => 5,
+        'type' => MENU_LOCAL_TASK
+      );
+    }
+
     theme_add_style(drupal_get_path('module', 'vote_up_down') . '/vote_up_down.css');
     drupal_add_js(drupal_get_path('module', 'vote_up_down') . '/ajax_vote_up_down.js');
   }
 
   return $items;
+}
+
+/*
+ * Menu callback; Handles admin/vote_up_down and subpages.
+ */
+function vote_up_down_page() {
+  $op = arg(2);
+
+  switch ($op) {
+    case 'user_votes':
+      $output = vote_up_down_user_votes();
+      break;
+    default:
+      $output = '<h3>Vote up/down statistics</h3><ul><li>';
+      $output .= l(t('user votes'), 'admin/vote_up_down/user_votes');
+      $output .= '</li></ul>';
+  }
+
+  return $output;
+}
+
+/*
+ * Users votes page for the vote_up_down data
+ */
+function vote_up_down_user_votes() {
+  $sql = "SELECT COUNT(v.value) AS number_votes, SUM(v.value) AS total_votes, v.uid, v.tag, u.uid, u.name FROM {votingapi_vote} v left join {users} u on v.uid = u.uid WHERE v.tag = 'vote' GROUP BY u.name";
+  $sql_cnt = "SELECT COUNT(DISTINCT(uid)) FROM {votingapi_vote}";
+  $header = array(
+    array('data' => t('User'), 'field' => 'u.name'),
+    array('data' => t('Votes'), 'field' => 'number_votes', 'sort' => 'desc'),
+    array('data' => t('Vote sum'), 'field' => 'total_votes'),
+  );
+  $sql .= tablesort_sql($header);
+  $result = pager_query($sql, 30, 0, $sql_cnt);
+  while ($vote = db_fetch_object($result)) {
+    $rows[] = array(
+      theme('username', $vote),
+      $vote->number_votes,
+      $vote->total_votes
+    );
+  }
+  drupal_set_title(t('user votes'));
+  $output = theme('table', $header, $rows);
+  $output .= theme('pager', NULL, 30, 0, tablesort_pager());
+
+  return $output;
+}
+
+/*
+ * Menu callback; display all votes for a node.
+ */
+function vote_up_down_tracker() {
+  if ($node = node_load(arg(1))) {
+    $header = array(
+      array('data' => t('User')),
+      array('data' => t('Vote')),
+      array('data' => t('Date'))
+    );
+    $votes = votingapi_get_content_votes('node', $node->nid);
+    foreach ($votes as $vote) {
+      $account = user_load(array('uid' => $vote[0]->uid, 'status' => 1));
+      $rows[] = array(
+        theme('username', $account),
+        $vote[0]->value,
+        array('data' => format_date($vote[0]->timestamp, 'small'), 'class' => 'nowrap')
+      );
+    }
+    drupal_set_title(check_plain($node->title));
+    $output = theme('table', $header, $rows);
+    $output .= theme('pager', NULL, 30);
+
+    return $output;
+  }
+  else {
+    drupal_not_found();
+  }
 }
 
 /**
@@ -118,19 +231,24 @@ function vote_up_down_menu($may_cache) {
 function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
   $links = array();
 
-  $node_type = in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE);
 
-  if ($type == 'node' && $node_type && user_access('view up-down vote')) {
-    if ($teaser) {
-      $links_display = variable_get('vote_up_down_link_teaser', 1);
-    }
-    else {
-      $links_display = variable_get('vote_up_down_link_page', 1);
-    }
-  }
-
-  if ($links_display) {
-    $links[] = _vote_up_down_points($node->nid, $type);
+  switch ($type) {
+    case 'node':
+      $node_type = in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE);
+      if ($node_type && user_access('view up-down vote')) {
+        if ($teaser && variable_get('vote_up_down_link_teaser', 1)) {
+          $links[] = _vote_up_down_points($node->nid, $type);
+        }
+        elseif (variable_get('vote_up_down_link_page', 1)) {
+          $links[] = _vote_up_down_points($node->nid, $type);
+        }
+      }
+      break;
+    case 'comment':
+      if (user_access('view up-down vote') && variable_get('vote_up_down_link_comment', 1)) {
+          $links[] = _vote_up_down_points($node->cid, $type);
+      }
+      break;
   }
 
   return $links;
@@ -147,6 +265,16 @@ function vote_up_down_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
         elseif (variable_get('vote_up_down_widget_page', 1) == 1) {
           $node->body = theme('vote_up_down_widget', $node->nid, 'node') . $node->body;
         }
+      }
+      break;
+  }
+}
+
+function vote_up_down_comment(&$comment, $op) {
+  switch ($op) {
+    case 'view':
+      if (variable_get('vote_up_down_widget_comment', 1)) {
+        $comment->comment = theme('vote_up_down_widget', $comment->cid, 'comment') . $comment->comment;
       }
       break;
   }
