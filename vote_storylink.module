@@ -149,8 +149,8 @@ function vote_storylink_form(&$node, &$param) {
 function vote_storylink_view(&$node, $teaser = FALSE, $page = FALSE) {
   if ($page) {
     // Breadcrumb navigation
-    $breadcrumb[] = array('path' => 'storylink', 'title' => t('storylinks'));
-    $breadcrumb[] = array('path' => 'storylink/'. $node->uid, 'title' => t("%name's storylinks", array('%name' => $node->name)));
+    $breadcrumb[] = array('path' => 'storylink', 'title' => t('story links'));
+    $breadcrumb[] = array('path' => 'storylink/'. $node->uid, 'title' => t("%name's story links", array('%name' => $node->name)));
     $breadcrumb[] = array('path' => 'node/'. $node->nid);
     menu_set_location($breadcrumb);
   }
@@ -236,9 +236,32 @@ function vote_storylink_link($type, $node = NULL, $teaser = FALSE) {
 }
 
 /**
+ * Implementation of hook_block().
+ */
+function vote_storylink_block($op = 'list', $delta = 0) {
+  global $user;
+  if ($op == 'list') {
+    $block[0]['info'] = t('Top story links');
+    return $block;
+  }
+  else if ($op == 'view') {
+    if (user_access('access content')) {
+      $items = array();
+      $items[] = l(t('this week'), 'storylink/top/week');
+      $items[] = l(t('this month'), 'storylink/top/month');
+      $items[] = l(t('this year'), 'storylink/top/year');
+      $items[] = l(t('all time'), 'storylink/top');
+      $block['subject'] = t('Top story links');
+      $block['content'] = theme('item_list', $items);
+      return $block;
+    }
+  }
+}
+
+/**
  * Menu callback; displays a Drupal page containing recent story links entries.
  */
-function vote_storylink_page($a = NULL, $b = NULL) {
+function vote_storylink_page($a = NULL, $b = NULL, $c = NULL) {
 
   if (is_numeric($a)) { // $a is a user ID
     if ($b == 'feed') {
@@ -251,6 +274,14 @@ function vote_storylink_page($a = NULL, $b = NULL) {
   elseif ($a == 'top') {
     if ($b == 'feed') {
       return vote_storylink_feed_top();
+    }
+    elseif ($b == ('week' || 'month' || 'year')) {
+      if ($c == 'feed') {
+        return vote_storylink_feed_interval_top($b);
+      }
+      else {
+        return vote_storylink_page_interval_top($b);
+      }
     }
     else {
       return vote_storylink_page_top();
@@ -268,7 +299,7 @@ function vote_storylink_page($a = NULL, $b = NULL) {
  * Display views of the storylinks
  */
 function vote_storylink_page_new() {
-  drupal_set_title(t('new story links'));
+  drupal_set_title($title = t('new story links'));
   $sql = db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC");
   $result = pager_query($sql, variable_get('default_nodes_main', 10));
   while ($node = db_fetch_object($result)) {
@@ -286,7 +317,7 @@ function vote_storylink_page_new() {
 }
 
 function vote_storylink_page_top() {
-  drupal_set_title(t('popular story links'));
+  drupal_set_title($title = t('popular story links'));
   $sql = db_rewrite_sql("SELECT n.nid, n.created, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC");
   $result = pager_query($sql, variable_get('default_nodes_main', 10));
   while ($node = db_fetch_object($result)) {
@@ -303,20 +334,21 @@ function vote_storylink_page_top() {
   return $output;
 }
 
-function vote_storylink_page_week_top() {
-  drupal_set_title(t('popular story links this week'));
-  $sql = db_rewrite_sql("SELECT n.nid, n.created, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC");
-  $result = pager_query($sql, variable_get('default_nodes_main', 10));
+function vote_storylink_page_interval_top($interval) {
+  drupal_set_title($title = t('popular story links this %epoch', array('%epoch' => $interval)));
+  $epoch = strtotime("-1 $interval");
+  $sql = db_rewrite_sql("SELECT n.nid, n.created, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND n.created >= %d AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC");
+  $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, NULL, $epoch);
   while ($node = db_fetch_object($result)) {
     $output .= node_view(node_load($node->nid), 1);
   }
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
-  $output .= theme('feed_icon', url('storylink/top/week/feed'));
+  $output .= theme('feed_icon', url("storylink/top/$interval/feed"));
 
   drupal_add_link(array('rel' => 'alternate',
                         'type' => 'application/rss+xml',
                         'title' => t('RSS - %title', array('%title' => $title)),
-                        'href' => url('storylink/top/week/feed')));
+                        'href' => url("storylink/top/$interval/feed")));
 
   return $output;
 }
@@ -330,9 +362,9 @@ function vote_storylink_page_user($uid) {
   $account = user_load(array((is_numeric($uid) ? 'uid' : 'name') => $uid, 'status' => 1));
 
   if ($account->uid) {
-    drupal_set_title($title = t("%name's storylinks", array('%name' => $account->name)));
-
-    $result = pager_query(db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE type = 'storylink' AND n.uid = %d AND n.status = 1 ORDER BY n.created DESC"), variable_get('default_nodes_main', 10), 0, NULL, $account->uid);
+    drupal_set_title($title = t("%name's story links", array('%name' => $account->name)));
+    $sql = db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE type = 'storylink' AND n.uid = %d AND n.status = 1 ORDER BY n.created DESC");
+    $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, NULL, $account->uid);
     while ($node = db_fetch_object($result)) {
       $output .= node_view(node_load($node->nid), 1);
     }
@@ -354,7 +386,8 @@ function vote_storylink_page_user($uid) {
  * Displays an RSS feed containing recent storylink entries of all users.
  */
 function vote_storylink_feed_new() {
-  $result = db_query_range(db_rewrite_sql("SELECT n.nid, n.title, n.created, r.teaser FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC"), 0, variable_get('feed_default_items', 10));
+  $sql = db_rewrite_sql("SELECT n.nid, n.title, n.created, r.teaser FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC");
+  $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' new';
   $channel['link'] = url('storylink/new', NULL, NULL, TRUE);
   $channel['description'] = $term->description;
@@ -362,9 +395,20 @@ function vote_storylink_feed_new() {
 }
 
 function vote_storylink_feed_top() {
-  $result = db_query_range(db_rewrite_sql("SELECT n.nid, n.created, n.title, r.teaser, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC"), 0, variable_get('feed_default_items', 10));
+  $sql = db_rewrite_sql("SELECT n.nid, n.created, n.title, r.teaser, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC");
+  $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' popular';
   $channel['link'] = url('storylink/top', NULL, NULL, TRUE);
+  $channel['description'] = $term->description;
+  node_feed($result, $channel);
+}
+
+function vote_storylink_feed_interval_top($interval) {
+  $epoch = strtotime("-1 $interval");
+  $sql = db_rewrite_sql("SELECT n.nid, n.created, n.title, r.teaser, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND n.created >= %d AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC");
+  $result = db_query_range($sql, $epoch, 0, variable_get('feed_default_items', 10));
+  $channel['title'] = variable_get('site_name', 'drupal') .' popular story links this '. $interval;
+  $channel['link'] = url("storylink/top/$interval", NULL, NULL, TRUE);
   $channel['description'] = $term->description;
   node_feed($result, $channel);
 }
@@ -378,9 +422,9 @@ function vote_storylink_feed_user($uid = 0) {
   else {
     $account = $user;
   }
-
-  $result = db_query_range(db_rewrite_sql("SELECT n.nid, n.title, n.created, r.teaser, u.name, u.uid FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid INNER JOIN {users} u ON n.uid = u.uid WHERE n.type = 'storylink' AND u.uid = %d AND n.status = 1 ORDER BY n.created DESC"), $uid, 0, variable_get('feed_default_items', 10));
-  $channel['title'] = $account->name ."'s storylinks";
+  $sql = db_rewrite_sql("SELECT n.nid, n.title, n.created, r.teaser, u.name, u.uid FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid INNER JOIN {users} u ON n.uid = u.uid WHERE n.type = 'storylink' AND u.uid = %d AND n.status = 1 ORDER BY n.created DESC");
+  $result = db_query_range($sql, $uid, 0, variable_get('feed_default_items', 10));
+  $channel['title'] = $account->name ."'s story links";
   $channel['link'] = url("storylink/$uid", NULL, NULL, TRUE);
   $channel['description'] = $term->description;
   node_feed($result, $channel);
