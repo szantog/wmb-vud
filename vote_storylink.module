@@ -247,6 +247,7 @@ function vote_storylink_block($op = 'list', $delta = 0) {
   else if ($op == 'view') {
     if (user_access('access content')) {
       $items = array();
+      $items[] = l(t('this day'), 'storylink/top/day');
       $items[] = l(t('this week'), 'storylink/top/week');
       $items[] = l(t('this month'), 'storylink/top/month');
       $items[] = l(t('this year'), 'storylink/top/year');
@@ -275,7 +276,7 @@ function vote_storylink_page($a = NULL, $b = NULL, $c = NULL) {
     if ($b == 'feed') {
       return vote_storylink_feed_top();
     }
-    elseif ($b == ('week' || 'month' || 'year')) {
+    elseif ($b == ('day' || 'week' || 'month' || 'year')) {
       if ($c == 'feed') {
         return vote_storylink_feed_interval_top($b);
       }

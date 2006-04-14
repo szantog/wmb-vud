@@ -190,7 +190,7 @@ function vote_up_down_user_votes() {
   }
   drupal_set_title(t('user votes'));
   $output = theme('table', $header, $rows);
-  $output .= theme('pager', NULL, 30, 0, tablesort_pager());
+  $output .= theme('pager', NULL, 30, 0);
 
   return $output;
 }

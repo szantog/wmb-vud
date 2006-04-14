@@ -1,10 +1,18 @@
+April 14, 2006
+------------------
+[Fredrik Jonsson]
+vote_storylink.module:
+- Added top page for this day including RSS feeds and a block with links.
+vote_up_down.module:
+- Removed depreciated call to tablesort_pager().
+
 April 4, 2006
 ------------------
 [Fredrik Jonsson]
 - This CHANGELOG.txt file added to track changes
 vote_storylink.module:
 - Fixed title for RSS feeds
-- Added pages for top week/month/year including RSS feeds and a block with links.
+- Added top pages for this week/month/year including RSS feeds and a block with links.
 vote_up_down.module:
 - Added voting to comments. Nothing happens to comments yet, they just get points.
 - Added a vote tracker (node/[nid]/votes) as a MENU_LOCAL_TASK.
@@ -66,3 +74,8 @@ February 10, 2006
 ------------------
 [Fredrik Jonsson]
 - Initial release
+
+
+Last updated:
+------------
+$Id$
