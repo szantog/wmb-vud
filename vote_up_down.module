@@ -254,6 +254,9 @@ function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
   return $links;
 }
 
+/**
+ * Implementation of hook_nodeapi().
+ */
 function vote_up_down_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'view':
@@ -270,6 +273,9 @@ function vote_up_down_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   }
 }
 
+/**
+ * Implementation of hook_comment().
+ */
 function vote_up_down_comment(&$comment, $op) {
   switch ($op) {
     case 'view':

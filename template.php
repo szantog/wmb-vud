@@ -1,7 +1,7 @@
 <?php
 function _phptemplate_variables($hook, $vars) {
   switch($hook) {
-    case 'node' :
+    case 'node':
       $vars['storylink_url'] = check_url($vars['node']->vote_storylink_url);
       if (arg(1) != 'add' && arg(1) != 'edit') {
         $vars['vote_up_down_widget'] = theme('vote_up_down_widget', $vars['node']->nid, 'node');
