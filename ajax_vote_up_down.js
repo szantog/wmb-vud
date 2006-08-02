@@ -58,18 +58,22 @@ VDB.prototype.receive = function(string, xmlhttp, vdb) {
     removeClass(elem, 'vote-up-inact');
     addClass(elem, 'vote-up-act');
     var did = 'vote_down_' + cid;
-    var elem2 = document.getElementById(did);
-    removeClass(elem2, 'vote-down-act');
-    addClass(elem2, 'vote-down-inact');
+    if (document.getElementById(did)) {
+      var elem2 = document.getElementById(did);
+      removeClass(elem2, 'vote-down-act');
+      addClass(elem2, 'vote-down-inact');
+    }
   }
   else if (hasClass(elem, 'vote-down-inact')) {
     removeClass(elem, 'vote-down-inact');
     addClass(elem, 'vote-down-act');
     var uid = 'vote_up_' + cid;
-    var elem2 = document.getElementById(uid);
-    removeClass(elem2, 'vote-up-act');
-    addClass(elem2, 'vote-up-inact');
+    if (document.getElementById(uid)) {
+      var elem2 = document.getElementById(uid);
+      removeClass(elem2, 'vote-up-act');
+      addClass(elem2, 'vote-up-inact');
+    }
   }
   // update the points
-  document.getElementById(pid).innerHTML = string;
+  document.getElementById(pid).outerHTML = string;
 }
