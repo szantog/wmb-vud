@@ -112,8 +112,8 @@ function vote_storylink_form(&$node, &$param) {
     '#title' => t('Title'),
     '#required' => TRUE,
     '#default_value' => $node->title,
-    '#maxlength' => 80,
-    '#description' => t("Titel of the story the link goes to, max 80 characters."),
+    '#maxlength' => 96,
+    '#description' => t("Titel of the story the link goes to, max 96 characters."),
     '#weight' => -18,
   );
 
@@ -195,6 +195,9 @@ function vote_storylink_prepare(&$node) {
  */
 function vote_storylink_validate(&$node) {
   vote_storylink_node_build($node);
+  if (db_num_rows(db_query("SELECT l.lid FROM {links} l INNER JOIN {links_node} ln ON l.lid = ln.lid WHERE ln.nid != %d AND LOWER(url) = LOWER('%s')", $node->nid, $node->vote_storylink_url)) > 0) {
+    form_set_error('vote_storylink_url', t('The URL is already submitted.'));
+  }
 }
 
 /**
@@ -508,9 +511,6 @@ function _vote_storylink_valid_url($formelement, $fieldname) {
   $url = $formelement['#value'];
   if (!preg_match('/^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}((:[0-9]{1,5})?\/.*)?$/i', $url)) {
     form_set_error($fieldname, t('The URL is not valid.'));
-  }
-  else if (db_num_rows(db_query("SELECT lid FROM {links} WHERE LOWER(url) = LOWER('%s')", $url)) > 0) {
-    form_set_error($fieldname, t('The URL is already submitted.'));
   }
 }
 
