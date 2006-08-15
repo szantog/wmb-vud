@@ -3,7 +3,7 @@ August 2, 2006
 [Fredrik Jonsson]
 vote_storylink.module:
 - Integrated the code from user_navigation.module in to vote_storylink.module.
-- Now check for duplicate url:s on validation.
+- Now check for duplicated url:s on validation.
 - Added a storylink/queue page.
 vote_up_down.module:
 - Integrated with the Userpoints module

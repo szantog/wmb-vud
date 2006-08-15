@@ -75,5 +75,5 @@ VDB.prototype.receive = function(string, xmlhttp, vdb) {
     }
   }
   // update the points
-  document.getElementById(pid).outerHTML = string;
+  document.getElementById(pid).innerHTML = string;
 }

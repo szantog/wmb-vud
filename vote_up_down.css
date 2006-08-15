@@ -53,6 +53,13 @@ a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
   padding: 3px;
   margin-bottom: 3px;
 }
+.vote-up-down-widget-alt .vote-points .vote-points {
+  background: transparent;
+  font-weight: normal;
+  font-size: 1em;
+  padding: 0;
+  margin-bottom: 0;
+}
 .vote-up-down-widget-alt .vote-points-label {
   font-size: 0.5em;
   background: transparent;

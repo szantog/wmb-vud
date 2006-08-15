@@ -110,7 +110,7 @@ function vote_up_down_settings() {
   );
   $form['vote_widget_settings_misc']['vote_up_down_reset_vote'] = array(
     '#type' => 'radios',
-    '#title' => t('Allow users to reset there votes'),
+    '#title' => t('Allow users to reset their votes'),
     '#default_value' => variable_get('vote_up_down_reset_vote', 0),
     '#options' => array(0 => t('No'), 1 => t('Yes')),
     '#description' => t('If yes a link will be displayd on nodes and commets that will reset the users votes on that node/comment.'),

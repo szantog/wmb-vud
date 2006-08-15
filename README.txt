@@ -29,7 +29,7 @@ List of the files and there function:
 * node-storylink.tpl.php - PHPTemplate theming of story links
 * alternative/node-storylink.tpl.php - PHPTemplate theming of story links
 * template.php - PHPTemplate theming of story links
-* vote_up_down.css - Adds som css style to the above files.
+* vote_up_down.css - Adds some css style to the above files.
 * ajax_vote_up_down.js - JavaScript for AJAX functionality
 
 The "vote_up_down.module" can be used on any node type to allow
