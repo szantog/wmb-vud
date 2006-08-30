@@ -128,3 +128,8 @@ a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
   width: 18px !important;
   height: 18px !important;
 }
+* html .vote-up-down-widget-alt .vote-up-act,
+* html .vote-up-down-widget-alt .vote-up-inact,
+* html .vote-up-down-widget-alt .up-inact {
+  width: 55px;
+}
