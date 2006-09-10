@@ -113,7 +113,7 @@ function vote_storylink_form(&$node, &$param) {
     '#required' => TRUE,
     '#default_value' => $node->title,
     '#maxlength' => 96,
-    '#description' => t("Titel of the story the link goes to, max 96 characters."),
+    '#description' => t("Title of the story the link goes to, max 96 characters."),
     '#weight' => -18,
   );
 
@@ -232,8 +232,8 @@ function vote_storylink_update(&$node) {
 function vote_storylink_link($type, $node = NULL, $teaser = FALSE) {
   $links = array();
 
-  if ($type == 'node' && $node->type == 'storylink') {
-    $links[] = l(t('more'), 'node/'. $node->nid);
+  if ($teaser && $type == 'node' && $node->type == 'storylink') {
+    $links[] = l(t('full story'), 'node/'. $node->nid, array('title' => 'Read the full story.'));
   }
 
   return $links;
@@ -455,6 +455,15 @@ function vote_storylink_feed_new() {
   $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' new';
   $channel['link'] = url('storylink/new', NULL, NULL, TRUE);
+  $channel['description'] = $term->description;
+  node_feed($result, $channel);
+}
+
+function vote_storylink_feed_queue() {
+  $sql = db_rewrite_sql("SELECT n.nid, n.title, n.created, r.teaser FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid WHERE n.type = 'storylink' AND n.status = 1 AND n.promote = 0 ORDER BY n.created DESC");
+  $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
+  $channel['title'] = variable_get('site_name', 'drupal') .' queue';
+  $channel['link'] = url('storylink/queue', NULL, NULL, TRUE);
   $channel['description'] = $term->description;
   node_feed($result, $channel);
 }
