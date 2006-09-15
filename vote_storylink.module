@@ -233,7 +233,7 @@ function vote_storylink_link($type, $node = NULL, $teaser = FALSE) {
   $links = array();
 
   if ($teaser && $type == 'node' && $node->type == 'storylink') {
-    $links[] = l(t('full story'), 'node/'. $node->nid, array('title' => 'Read the full story.'));
+    $links[] = l(t('full story'), 'node/'. $node->nid, array('title' => t('Read the full story.')));
   }
 
   return $links;

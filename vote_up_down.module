@@ -240,23 +240,25 @@ function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
     case 'node':
       $node_type = in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE);
       if ($node_type && user_access('view up-down vote')) {
+        if (variable_get('vote_up_down_reset_vote', 0)) {
+          $links[]=  l(t('reset vote'), "vote_up_down/$type/$node->nid/0", array('title' => t('Reset your vote.')), drupal_get_destination(), NULL, FALSE, TRUE);
+        }
         if ($teaser && variable_get('vote_up_down_link_node', 0) && variable_get('vote_up_down_link_node', 0) != 2) {
-          if (variable_get('vote_up_down_reset_vote', 0)) {
-            $links[]=  l(t('reset vote'), "vote_up_down/$type/$node->nid/0", array('title' => 'Reset your vote.'), drupal_get_destination(), NULL, FALSE, TRUE);
-          }
           $links[] = theme('vote_up_down_points', $node->nid, $type);
         }
-        elseif (variable_get('vote_up_down_link_node', 0) > 1) {
-          if (variable_get('vote_up_down_reset_vote', 0)) {
-            $links[]=  l(t('reset vote'), "vote_up_down/$type/$node->nid/0", array('title' => 'Reset your vote.'), drupal_get_destination(), NULL, FALSE, TRUE);
-          }
+        elseif (!$teaser && variable_get('vote_up_down_link_node', 0) > 1) {
           $links[] = theme('vote_up_down_points', $node->nid, $type);
         }
       }
       break;
     case 'comment':
-      if (user_access('view up-down vote') && variable_get('vote_up_down_link_comment', 0)) {
-          $links[] = theme('vote_up_down_points', $node->cid, $type);
+      if (user_access('view up-down vote')) {
+          if (variable_get('vote_up_down_reset_vote', 0)) {
+            $links[]=  l(t('reset vote'), "vote_up_down/$type/$node->cid/0", array('title' => t('Reset your vote.')), drupal_get_destination(), NULL, FALSE, TRUE);
+          }
+          if (variable_get('vote_up_down_link_comment', 0)) {
+            $links[] = theme('vote_up_down_points', $node->cid, $type);
+          }
       }
       break;
   }
@@ -285,12 +287,12 @@ function vote_up_down_page() {
   $op = arg(2);
 
   switch ($op) {
-    case 'users_votes':
+    case 'usersvotes':
       $output = vote_up_down_users_votes();
       break;
     default:
       $output = '<h3>Vote up/down statistics</h3><ul><li>';
-      $output .= l(t('users by votes'), 'admin/vote_up_down/users_votes');
+      $output .= l(t('users by votes'), 'admin/vote_up_down/usersvotes');
       $output .= '</li></ul>';
   }
 
@@ -392,41 +394,42 @@ function vote_up_down_tracker() {
 function vote_up_down_vote($type, $cid, $value, $ajax = FALSE, $alt = FALSE) {
   if (is_numeric($cid) && is_numeric($value)) {
 
-    //userpoints integration
-    if (module_exist('userpoints')) {
-      global $user;
-      $node = db_fetch_object(db_query(db_rewrite_sql('SELECT n.uid FROM {node} n WHERE n.nid = %d'), $cid));
-      $user_vote = votingapi_get_user_votes($type, $cid);
-      if (!$user_vote && ($node->uid != $user->uid)) {
-        vote_up_down_userpoints(variable_get('userpoints_vote_up_down', 0));
-      }
+    // sanity-check the incoming values.
+    if ($value > 0) {
+      $vote->value = 1;
+    }
+    elseif ($value < 0) {
+      $vote->value = -1;
+    }
+    else {
+      $vote->value = 0;
     }
 
     $vote->value_type = 'points';
     $vote->tag = 'vote';
 
-    // sanity-check the incoming values.
-    if ($value > 0) {
-      $vote->value = 1;
-      votingapi_set_vote($type, $cid, $vote);
+    //userpoints integration
+    if (module_exist('userpoints')) {
+      global $user;
+      $node = db_fetch_object(db_query(db_rewrite_sql('SELECT n.uid FROM {node} n WHERE n.nid = %d'), $cid));
+      $user_vote = votingapi_get_user_votes($type, $cid);
+      if (!$user_vote && ($node->uid != $user->uid) && $vote->value != 0) {
+        vote_up_down_userpoints(variable_get('userpoints_vote_up_down', 0));
+      }
     }
-    elseif ($value < 0) {
-      $vote->value = -1;
-      votingapi_set_vote($type, $cid, $vote);
+
+
+    // do the voting via voting api.
+    votingapi_set_vote($type, $cid, $vote);
+
+    if ($ajax) {
+      $style = ($alt == TRUE ? '_alt' : '');
+      print theme("vote_up_down_points$style", $cid, $type);
+      exit();
     }
     else {
-      $vote->value = 0;
-      votingapi_unset_vote($type, $cid);
+      drupal_goto(drupal_get_destination());
     }
-  }
-
-  if ($ajax) {
-    $style = ($alt == TRUE ? '_alt' : '');
-    print theme("vote_up_down_points$style", $cid, $type);
-    exit();
-  }
-  else {
-    drupal_goto(drupal_get_destination());
   }
 }
 

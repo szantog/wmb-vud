@@ -1,3 +1,15 @@
+September 15, 2006
+------------------
+[Fredrik Jonsson]
+vote_storylink.module:
+- Minor bug fixes.
+vote_up_down.module:
+- User now don't get Userpoints when voting on ther own content.
+- Fixed Vote points display setting "Full page view" bug.
+- "Reset vote" now set the vote to = instead of removing it. 
+  Seems to fix the voting action error.
+- Minor bug fixes.
+
 August 2, 2006
 ------------------
 [Fredrik Jonsson]
@@ -11,7 +23,6 @@ vote_up_down.module:
 - Add a "Alternative +1 vote style" (digg style) voting widget.
 - Redesigned the settings.
 - Add a "reset vote" link with setting to turn on and off.
-
 
 April 14, 2006
 ------------------
