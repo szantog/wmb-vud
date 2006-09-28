@@ -240,7 +240,7 @@ function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
     case 'node':
       $node_type = in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE);
       if ($node_type && user_access('view up-down vote')) {
-        if (variable_get('vote_up_down_reset_vote', 0)) {
+        if (variable_get('vote_up_down_reset_vote', 0) && user_access('use up-down vote')) {
           $links[]=  l(t('reset vote'), "vote_up_down/$type/$node->nid/0", array('title' => t('Reset your vote.')), drupal_get_destination(), NULL, FALSE, TRUE);
         }
         if ($teaser && variable_get('vote_up_down_link_node', 0) && variable_get('vote_up_down_link_node', 0) != 2) {
@@ -252,13 +252,11 @@ function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
       }
       break;
     case 'comment':
-      if (user_access('view up-down vote')) {
-          if (variable_get('vote_up_down_reset_vote', 0)) {
-            $links[]=  l(t('reset vote'), "vote_up_down/$type/$node->cid/0", array('title' => t('Reset your vote.')), drupal_get_destination(), NULL, FALSE, TRUE);
-          }
-          if (variable_get('vote_up_down_link_comment', 0)) {
-            $links[] = theme('vote_up_down_points', $node->cid, $type);
-          }
+      if (variable_get('vote_up_down_reset_vote', 0) && user_access('use up-down vote')) {
+        $links[]=  l(t('reset vote'), "vote_up_down/$type/$node->cid/0", array('title' => t('Reset your vote.')), drupal_get_destination(), NULL, FALSE, TRUE);
+      }
+      if (variable_get('vote_up_down_link_comment', 0) && user_access('view up-down vote')) {
+        $links[] = theme('vote_up_down_points', $node->cid, $type);
       }
       break;
   }
