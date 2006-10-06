@@ -98,11 +98,11 @@ function vote_storylink_menu($may_cache) {
 /**
  * Implementation of hook_user().
  */
-function vote_storylink_user($type, &$edit, &$user) {
-  if ($type == 'view' && user_access('create storylinks', $user)) {
+function vote_storylink_user($type, &$edit, &$account, $category = NULL) {
+  if ($type == 'view' && user_access('create storylinks', $account)) {
     $items[] = array(
       'title' => t('Story links'),
-      'value' => l(t('view recent story links'), "storylink/$user->uid", array('title' => t("Read %username's latest story links.", array('%username' => $user->name)))),
+      'value' => l(t('view recent story links'), "storylink/$account->uid", array('title' => t("Read %username's latest story links.", array('%username' => $account->name)))),
       'class' => 'storylink',
     );
     return array(t('History') => $items);
@@ -128,6 +128,7 @@ function vote_storylink_form(&$node, &$param) {
     '#type' => 'textfield',
     '#title' => t('URL'),
     '#default_value' => $node->vote_storylink[0]['url'],
+    '#maxlength' => 256,
     '#required' => TRUE,
     '#description' => t('The URL/address of the story.'),
     '#validate' => array('_vote_storylink_valid_url' => array('vote_storylink_url')),
@@ -141,7 +142,7 @@ function vote_storylink_form(&$node, &$param) {
     '#required' => FALSE,
     '#rows' => 5,
     '#maxlength' => 300,
-    '#resizable' => FALSE,
+    '#resizable' => TRUE,
     '#description' => t('A short description of the story. It should be around 2 to 4 sentences.'),
     '#weight' => -16,
   );
