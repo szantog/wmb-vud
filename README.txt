@@ -1,7 +1,7 @@
 Drupal Vote up/down Package:
 ---------------------------
 Author - Fredrik Jonsson fredrik at combonet dot se
-Requires - Drupal 4.7
+Requires - Drupal 5
 License - GPL (see LICENSE)
 
 
@@ -104,6 +104,16 @@ javascript:location.href='http://www.example.com/node/add/storylink?edit[url]='+
 
 Replace "www.example.com" with your domain.
 
+
+Contributions:
+-------------
+* INSTALL.txt contributed by Ron Williams.
+  This has cut down on the support requst considerbly and
+  has made the package much more accessible for users.
+
+* jQuery verision of ajax_vote_up_down.js by Nedjo Rogers.
+  The Drupal 5 version whould have taken a *lot* longer
+  if I have had to do this myself.
 
 Last updated:
 ------------

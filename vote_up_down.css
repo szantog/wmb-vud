@@ -93,9 +93,9 @@ a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
   max-width: 18px !important;
   max-height: 18px !important;
 }
-.storylink h2, 
+.storylink h2.title, 
 .storylink .content, 
-.storylink .info, 
+.storylink .submitted, 
 .storylink .links {
   padding-left: 26px;
 }
@@ -111,9 +111,9 @@ a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
   max-width: 18px !important;
   max-height: 18px !important;
 }
-.storylink-alt h2, 
+.storylink-alt h2.title, 
 .storylink-alt .content, 
-.storylink-alt .info, 
+.storylink-alt .submitted, 
 .storylink-alt .links {
   padding-left: 42px;
 }

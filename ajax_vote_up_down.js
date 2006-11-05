@@ -1,79 +1,62 @@
-if (isJsEnabled()) {
-  addLoadEvent(voteUpDownAutoAttach);
-}
+// $Id$
 
-function voteUpDownAutoAttach() {
+Drupal.voteUpDownAutoAttach = function() {
   var vdb = [];
-  var spans = document.getElementsByTagName('span');
-  for (var i = 0; span = spans[i]; i++) {
-    if (span && (hasClass(span, 'vote-up-inact') || hasClass(span, 'vote-down-inact') || hasClass(span, 'vote-up-act') || hasClass(span, 'vote-down-act'))) {
-      // Read in the path to the PHP handler
-      uri = span.getAttribute('title');
-      // Read in the id
-      id  = span.getAttribute('id');
-      // Remove the title, so no tooltip will display
-      span.removeAttribute('title');
-      // remove href link
-      var elem = document.getElementById(id);
-      elem.innerHTML = '';
-      // Create an object with this uri. Because
-      // we feed in the span as an argument, we'll be able
-      // to attach events to this element.
-      if (!vdb[uri]) {
-        vdb[uri] = new VDB(span, uri, id);
-      }
+  $('span.vote-up-inact, span.vote-down-inact, span.vote-up-act, span.vote-down-act').each(function () {
+    // Read in the path to the PHP handler
+    uri = this.getAttribute('title');
+    // Remove the title, so no tooltip will display
+    this.removeAttribute('title');
+    // remove href link
+    $(this).html('');
+    // Create an object with this uri. Because
+    // we feed in the span as an argument, we'll be able
+    // to attach events to this element.
+    if (!vdb[uri]) {
+      vdb[uri] = new Drupal.VDB(this, uri);
     }
-  }
+  });
 }
 
 /**
  * A Vote DataBase object
  */
-function VDB(elt, uri, id) {
+Drupal.VDB = function(elt, uri, id) {
   var db = this;
   // By making the span element a property of this object,
   // we get the ability to attach behaviours to that element.
   this.elt = elt;
   this.uri = uri;
-  this.id  = id;
-  this.elt.onclick = function() {
-    HTTPGet(db.uri, db.receive, db);
+  this.id = elt.getAttribute('id');
+  this.dir1 = this.id.indexOf('vote_up') > -1 ? 'up' : 'down';
+  this.dir2 = this.dir1 == 'up' ? 'down' : 'up';
+  elt.onclick = function() {
+    // Ajax GET request for vote data
+    $.ajax({
+      type: "GET",
+      url: db.uri,
+      success: function (data) {
+        // extract the cid so we can change other elements for the same cid
+        var cid = db.id.match(/[0-9]+$/);
+        var pid = 'vote_points_' + cid;
+        //update the voting arrows
+        $('#' + db.id + '.vote-' + db.dir1 + '-inact')
+          .removeClass('vote-' + db.dir1 + '-inact')
+          .addClass('vote-' + db.dir1 + '-act');
+        $('#' + 'vote_' + db.dir2 + '_' + cid)
+          .removeClass('vote-' + db.dir2 + '-act')
+          .addClass('vote-' + db.dir2 + '-inact');
+        // update the points
+        $('#' + pid).html(data);
+      },
+      error: function (xmlhttp) {
+        alert('An HTTP error '+ xmlhttp.status +' occured.\n'+ db.uri);
+      }
+    });
   }
 }
 
-/**
- * HTTP callback function.
- */
-VDB.prototype.receive = function(string, xmlhttp, vdb) {
-  if (xmlhttp.status != 200) {
-    return alert('An HTTP error '+ xmlhttp.status +' occured.\n'+ vdb.uri);
-  }
-
-  // extract the cid so we can change other elements for the same cid
-  var cid = vdb.id.match(/[0-9]+$/);
-  var pid = 'vote_points_' + cid;
-  //update the voting arrows
-  var elem = document.getElementById(vdb.id);
-  if (hasClass(elem, 'vote-up-inact')) {
-    removeClass(elem, 'vote-up-inact');
-    addClass(elem, 'vote-up-act');
-    var did = 'vote_down_' + cid;
-    if (document.getElementById(did)) {
-      var elem2 = document.getElementById(did);
-      removeClass(elem2, 'vote-down-act');
-      addClass(elem2, 'vote-down-inact');
-    }
-  }
-  else if (hasClass(elem, 'vote-down-inact')) {
-    removeClass(elem, 'vote-down-inact');
-    addClass(elem, 'vote-down-act');
-    var uid = 'vote_up_' + cid;
-    if (document.getElementById(uid)) {
-      var elem2 = document.getElementById(uid);
-      removeClass(elem2, 'vote-up-act');
-      addClass(elem2, 'vote-up-inact');
-    }
-  }
-  // update the points
-  document.getElementById(pid).innerHTML = string;
+// Global killswitch
+if (Drupal.jsEnabled) {
+  $(document).ready(Drupal.voteUpDownAutoAttach);
 }
