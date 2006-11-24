@@ -5,7 +5,7 @@ function _phptemplate_variables($hook, $vars) {
   switch($hook) {
     case 'node':
       $vars['storylink_url'] = check_url($vars['node']->vote_storylink_url);
-      if (arg(1) != 'add' && arg(1) != 'edit') {
+      if (arg(1) != 'add' && arg(2) != 'edit') {
         $style = variable_get('vote_up_down_widget_style_node', 0) == 1 ? '_alt' : '';
         $vars['vote_up_down_widget'] = theme("vote_up_down_widget$style", $vars['node']->nid, 'node');
         $vars['vote_up_down_points'] = theme("vote_up_down_points$style", $vars['node']->nid, 'node');

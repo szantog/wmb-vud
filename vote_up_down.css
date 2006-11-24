@@ -120,6 +120,7 @@ a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
 
 /* Fixing IE6 bug, the "* html" make other browsers ignore it */
 
+/* Hides from IE-mac \*/
 * html .storylink .picture img {
   width: 18px !important;
   height: 18px !important;
@@ -133,3 +134,7 @@ a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
 * html .vote-up-down-widget-alt .up-inact {
   width: 55px;
 }
+* html .content {
+  height: 1%;
+}
+/* End hide from IE-mac */

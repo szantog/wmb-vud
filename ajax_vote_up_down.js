@@ -4,9 +4,9 @@ Drupal.voteUpDownAutoAttach = function() {
   var vdb = [];
   $('span.vote-up-inact, span.vote-down-inact, span.vote-up-act, span.vote-down-act').each(function () {
     // Read in the path to the PHP handler
-    uri = this.getAttribute('title');
+    uri = $(this).attr('title');
     // Remove the title, so no tooltip will display
-    this.removeAttribute('title');
+    $(this).removeAttr('title');
     // remove href link
     $(this).html('');
     // Create an object with this uri. Because
@@ -27,10 +27,10 @@ Drupal.VDB = function(elt, uri, id) {
   // we get the ability to attach behaviours to that element.
   this.elt = elt;
   this.uri = uri;
-  this.id = elt.getAttribute('id');
+  this.id = $(elt).attr('id');
   this.dir1 = this.id.indexOf('vote_up') > -1 ? 'up' : 'down';
   this.dir2 = this.dir1 == 'up' ? 'down' : 'up';
-  elt.onclick = function() {
+  $(elt).click(function() {
     // Ajax GET request for vote data
     $.ajax({
       type: "GET",
@@ -53,7 +53,7 @@ Drupal.VDB = function(elt, uri, id) {
         alert('An HTTP error '+ xmlhttp.status +' occured.\n'+ db.uri);
       }
     });
-  }
+  });
 }
 
 // Global killswitch
