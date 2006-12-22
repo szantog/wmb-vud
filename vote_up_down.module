@@ -54,7 +54,7 @@ function vote_up_down_admin_settings() {
   $form['vote_widget_settings_node'] = array(
     '#type' => 'fieldset',
     '#title' => t('Vote widget settings for nodes'),
-    '#description' => t('For more control over the voting widget placement it can be inserted directly in the theme, see the included template.php and node-storylink.tpl.php for an example. When this metod is used turn off the widget display here.'),
+    '#description' => t('For more control over the voting widget placement it can be inserted directly in the theme, see the included template.php and node-storylink.tpl.php for an example. When this method is used turn off the widget display here.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
