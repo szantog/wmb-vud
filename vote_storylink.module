@@ -559,5 +559,3 @@ function vote_storylink_node_build(&$node, $url='') {
   // Wrap $link as the [0] element of a trivial outer array.
   $node->vote_storylink = array($link);
 }
-
-?>
