@@ -62,7 +62,7 @@ function vote_storylink_access($op, $node) {
 function vote_storylink_admin_settings() {
   if (!module_exists('links')) {
     drupal_set_message(t('The &quot;links&quot; module is disabled or not installed. Storylinks will not function until this is corrected. Check the availability of
-that module, and enable if needed, in the %modules.',array('%modules'=>l(t('modules administration page'),'admin/modules'))),'error');
+that module, and enable if needed, in the !modules.',array('!modules'=>l(t('modules administration page'),'admin/modules'))),'error');
   }
 
   return system_settings_form($form);
@@ -101,7 +101,7 @@ function vote_storylink_user($type, &$edit, &$account, $category = NULL) {
   if ($type == 'view' && user_access('create storylinks', $account)) {
     $items[] = array(
       'title' => t('Story links'),
-      'value' => l(t('view recent story links'), "storylink/$account->uid", array('title' => t("Read %username's latest story links.", array('%username' => $account->name)))),
+      'value' => l(t('view recent story links'), "storylink/$account->uid", array('title' => t("Read @username's latest story links.", array('@username' => $account->name)))),
       'class' => 'storylink',
     );
     return array(t('History') => $items);
@@ -158,7 +158,7 @@ function vote_storylink_view($node, $teaser = FALSE, $page = FALSE) {
   if ($page) {
     // Breadcrumb navigation
     $breadcrumb[] = array('path' => 'storylink', 'title' => t('story links'));
-    $breadcrumb[] = array('path' => 'storylink/'. $node->uid, 'title' => t("%name's story links", array('%name' => $node->name)));
+    $breadcrumb[] = array('path' => 'storylink/'. $node->uid, 'title' => t("@name's story links", array('@name' => $node->name)));
     $breadcrumb[] = array('path' => 'node/'. $node->nid);
     menu_set_location($breadcrumb);
   }
@@ -370,7 +370,7 @@ function vote_storylink_page_new() {
 
   drupal_add_link(array('rel' => 'alternate',
                         'type' => 'application/rss+xml',
-                        'title' => t('RSS - %title', array('%title' => $title)),
+                        'title' => t('RSS - @title', array('@title' => $title)),
                         'href' => url('storylink/new/feed')));
 
   return $output;
@@ -388,7 +388,7 @@ function vote_storylink_page_queue() {
 
   drupal_add_link(array('rel' => 'alternate',
                         'type' => 'application/rss+xml',
-                        'title' => t('RSS - %title', array('%title' => $title)),
+                        'title' => t('RSS - @title', array('@title' => $title)),
                         'href' => url('storylink/queue/feed')));
 
   return $output;
@@ -406,14 +406,14 @@ function vote_storylink_page_top() {
 
   drupal_add_link(array('rel' => 'alternate',
                         'type' => 'application/rss+xml',
-                        'title' => t('RSS - %title', array('%title' => $title)),
+                        'title' => t('RSS - @title', array('@title' => $title)),
                         'href' => url('storylink/top/feed')));
 
   return $output;
 }
 
 function vote_storylink_page_interval_top($interval) {
-  drupal_set_title($title = t('popular story links this %epoch', array('%epoch' => t($interval))));
+  drupal_set_title($title = t('popular story links this @epoch', array('@epoch' => t($interval))));
   $epoch = strtotime("-1 $interval");
   $sql = db_rewrite_sql("SELECT n.nid, n.created, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND n.created >= %d AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC");
   $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, NULL, $epoch);
@@ -425,7 +425,7 @@ function vote_storylink_page_interval_top($interval) {
 
   drupal_add_link(array('rel' => 'alternate',
                         'type' => 'application/rss+xml',
-                        'title' => t('RSS - %title', array('%title' => $title)),
+                        'title' => t('RSS - @title', array('@title' => $title)),
                         'href' => url("storylink/top/$interval/feed")));
 
   return $output;
@@ -440,7 +440,7 @@ function vote_storylink_page_user($uid) {
   $account = user_load(array((is_numeric($uid) ? 'uid' : 'name') => $uid, 'status' => 1));
 
   if ($account->uid) {
-    drupal_set_title($title = t("%name's story links", array('%name' => $account->name)));
+    drupal_set_title($title = t("@name's story links", array('@name' => $account->name)));
     $sql = db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE type = 'storylink' AND n.uid = %d AND n.status = 1 ORDER BY n.created DESC");
     $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, NULL, $account->uid);
     while ($node = db_fetch_object($result)) {
@@ -451,7 +451,7 @@ function vote_storylink_page_user($uid) {
 
     drupal_add_link(array('rel' => 'alternate',
                           'type' => 'application/rss+xml',
-                          'title' => t('RSS - %title', array('%title' => $title)),
+                          'title' => t('RSS - @title', array('@title' => $title)),
                           'href' => url("storylink/$account->uid/feed")));
     return $output;
   }
@@ -522,7 +522,7 @@ function vote_storylink_feed_user($uid = 0) {
  */
 function theme_vote_storylink_via($link_url) {
   $link_url = parse_url($link_url);
-  $output = '<div class="vote-up-down-via">('. t('via %domain', array('%domain' => $link_url['host'])) .')</div>';
+  $output = '<div class="vote-up-down-via">('. t('via @domain', array('@domain' => $link_url['host'])) .')</div>';
   return $output;
 }
 

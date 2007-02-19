@@ -602,7 +602,7 @@ function _vote_up_down_get_uid() {
     // If the IP is valid turn it into a integer and add the number of the current day.
     // The current day is what limit anonymous voting to one vote per day and IP address.
     if ($long = ip2long($_SERVER['REMOTE_ADDR'])) {
-      $uid = sprintf("%u", $long) . date('z');
+      $uid = abs($long) + date('z');
     }
   }
   else {
