@@ -109,6 +109,22 @@ function vote_storylink_user($type, &$edit, &$account, $category = NULL) {
 }
 
 /**
+ * Implementation of hook_nodeapi().
+ */
+function vote_storylink_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+  switch ($op) {
+    case 'rss item':
+      if ($node->type == 'storylink' && variable_get('feed_item_length','teaser') == 'teaser') {
+        $node->teaser .= '<p><a href="'. check_url($node->vote_storylink_url) .'" title="'. t('Go to the original news source.') .'">'. t('original news source') .'</a></p>';
+      }
+      elseif ($node->type == 'storylink' && variable_get('feed_item_length','teaser') == 'fulltext') {
+        $node->body .= '<p><a href="'. check_url($node->vote_storylink_url) .'" title="'. t('Go to the original news source.') .'">'. t('original news source') .'</a></p>';
+      }
+      break;
+  }
+}
+
+/**
  * Implementation of hook_form().
  */
 function vote_storylink_form(&$node, &$param) {
@@ -134,7 +150,7 @@ function vote_storylink_form(&$node, &$param) {
     '#weight' => -17,
   );
 
-  $form['body'] = array(
+  $form['body_filter']['body'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
     '#default_value' => $node->body,
@@ -146,7 +162,7 @@ function vote_storylink_form(&$node, &$param) {
     '#weight' => -16,
   );
 
-  $form['format'] = filter_form($node->format);
+  $form['body_filter']['filter'] = filter_form($node->format);
 
   return $form;
 }
