@@ -3,3 +3,4 @@ name = Vote up/down
 description = Adds a up/down vote widget to selected node types, part of Vote up/down.
 dependencies = votingapi
 package = Voting
+version = "$Name$"

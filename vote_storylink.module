@@ -114,10 +114,10 @@ function vote_storylink_user($type, &$edit, &$account, $category = NULL) {
 function vote_storylink_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'rss item':
-      if ($node->type == 'storylink' && variable_get('feed_item_length','teaser') == 'teaser') {
+      if ($node->type == 'storylink' && variable_get('feed_item_length', 'teaser') == 'teaser') {
         $node->teaser .= '<p><a href="'. check_url($node->vote_storylink_url) .'" title="'. t('Go to the original news source.') .'">'. t('original news source') .'</a></p>';
       }
-      elseif ($node->type == 'storylink' && variable_get('feed_item_length','teaser') == 'fulltext') {
+      elseif ($node->type == 'storylink' && variable_get('feed_item_length', 'teaser') == 'fulltext') {
         $node->body .= '<p><a href="'. check_url($node->vote_storylink_url) .'" title="'. t('Go to the original news source.') .'">'. t('original news source') .'</a></p>';
       }
       break;
@@ -196,7 +196,7 @@ function vote_storylink_load($node) {
  */
 function vote_storylink_prepare(&$node) {
   // Allow the following fields to be initialized via $_GET (e.g. for use
-  // with a "blog it" bookmarklet):
+  // with a "submit it" bookmarklet):
   foreach (array('title', 'body') as $field) {
     if ($_GET['edit'][$field]) {
       $node->$field = $_GET['edit'][$field];
@@ -484,7 +484,7 @@ function vote_storylink_feed_new() {
   $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' new';
   $channel['link'] = url('storylink/new', NULL, NULL, TRUE);
-  $channel['description'] = $term->description;
+  $channel['description'] = t('New storylinks');
   node_feed($result, $channel);
 }
 
@@ -493,7 +493,7 @@ function vote_storylink_feed_queue() {
   $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' queue';
   $channel['link'] = url('storylink/queue', NULL, NULL, TRUE);
-  $channel['description'] = $term->description;
+  $channel['description'] = t('Queued storylinks');
   node_feed($result, $channel);
 }
 
@@ -502,7 +502,7 @@ function vote_storylink_feed_top() {
   $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' popular';
   $channel['link'] = url('storylink/top', NULL, NULL, TRUE);
-  $channel['description'] = $term->description;
+  $channel['description'] = t('Popular storylinks');
   node_feed($result, $channel);
 }
 
@@ -512,7 +512,7 @@ function vote_storylink_feed_interval_top($interval) {
   $result = db_query_range($sql, $epoch, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' popular story links this '. $interval;
   $channel['link'] = url("storylink/top/$interval", NULL, NULL, TRUE);
-  $channel['description'] = $term->description;
+  $channel['description'] = t('Popular storylinks');
   node_feed($result, $channel);
 }
 
@@ -529,7 +529,7 @@ function vote_storylink_feed_user($uid = 0) {
   $result = db_query_range($sql, $uid, 0, variable_get('feed_default_items', 10));
   $channel['title'] = $account->name ."'s story links";
   $channel['link'] = url("storylink/$uid", NULL, NULL, TRUE);
-  $channel['description'] = $term->description;
+  $channel['description'] = t('User storylinks');
   node_feed($result, $channel);
 }
 
@@ -560,10 +560,11 @@ function _vote_storylink_valid_url($formelement, $fieldname) {
  * this site allows "related links" for storylink nodes, that's handled
  * by the links_related module, not here.
  */
-function vote_storylink_node_build(&$node, $url='') {
+function vote_storylink_node_build(&$node, $url = '') {
   if (empty($url)) {
     $url = links_normalize_url($node->vote_storylink_url);
-  } else {
+  }
+  else {
     $url = links_normalize_url($url);
   }
   $node->vote_storylink_url = $url;
