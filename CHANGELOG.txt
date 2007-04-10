@@ -1,3 +1,20 @@
+April 10, 2007
+------------------
+[Fredrik Jonsson]
+vote_storylink.module:
+- Added a better error message when a duplicate url is submitted.
+- Minor coding style fixes.
+
+April 3, 2007
+------------------
+[Fredrik Jonsson]
+vote_up_down.module:
+- Anonymous voting support
+- Users don't get points for voting on there own comments.
+- Added users/uid/votes that lists all the nodes a user has voted on.
+- Fixed the description for RSS feeds.
+- Minor coding style fixes.
+
 November 3, 2006
 ------------------
 [Fredrik Jonsson]
@@ -9,7 +26,7 @@ September 15, 2006
 vote_storylink.module:
 - Minor bug fixes.
 vote_up_down.module:
-- User now don't get Userpoints when voting on ther own content.
+- User now don't get Userpoints when voting on there own content.
 - Fixed Vote points display setting "Full page view" bug.
 - "Reset vote" now set the vote to = instead of removing it. 
   Seems to fix the voting action error.
@@ -52,7 +69,7 @@ vote_up_down.module:
 March 27, 2006
 ------------------
 [Fredrik Jonsson]
-- Removed node_validate_title() cruft.
+- Removed unnecessary node_validate_title().
 - Better url validation and checking.
 
 March 17, 2006
@@ -79,7 +96,7 @@ March 1, 2006
 [Fredrik Jonsson]
 - New vote path so you must go to admin/modules and save to activate.
   Now uses checkboxes to choose node types like in taxonomy module.
-- Layout tweeks.
+- Layout tweaks.
 
 February 26, 2006
 ------------------
