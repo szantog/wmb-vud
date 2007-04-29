@@ -96,7 +96,7 @@ a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
 .storylink h2.title, 
 .storylink .content, 
 .storylink .submitted, 
-.storylink .links {
+.storylink div.links {
   padding-left: 26px;
 }
 
@@ -114,7 +114,7 @@ a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
 .storylink-alt h2.title, 
 .storylink-alt .content, 
 .storylink-alt .submitted, 
-.storylink-alt .links {
+.storylink-alt div.links {
   padding-left: 42px;
 }
 

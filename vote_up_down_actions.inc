@@ -99,7 +99,7 @@ function action_vote_up_down_userpoints_add($op, $edit = array(), &$node) {
         'configurable' => FALSE,
       );
     case 'do':
-      vote_up_down_userpoints(variable_get('userpoints_actions', 0), $node->uid);
+      userpoints_userpointsapi('points', variable_get('userpoints_actions', 0), $node->uid);
       watchdog('action', t('Awarded userpoint to author of node id %id', array('%id' => intval($node->nid))));
       break;
     // process the HTML form to store configuration
@@ -122,7 +122,7 @@ function action_vote_up_down_userpoints_remove($op, $edit = array(), &$node) {
         'configurable' => FALSE,
       );
     case 'do':
-      vote_up_down_userpoints(-variable_get('userpoints_actions', 0), $node->uid);
+      userpoints_userpointsapi('points', -variable_get('userpoints_actions', 0), $node->uid);
       watchdog('action', t('Deducted userpoint from author of node id %id', array('%id' => intval($node->nid))));
       break;
     // process the HTML form to store configuration
