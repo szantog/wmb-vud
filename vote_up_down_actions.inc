@@ -90,7 +90,7 @@
  * Award userpoint to node author.
  */
 function action_vote_up_down_userpoints_add($op, $edit = array(), &$node) {
-  switch($op) {
+  switch ($op) {
     case 'metadata':
       return array(
         'description' => t('Award userpoint to node author (Vote up/down)'),
@@ -98,10 +98,20 @@ function action_vote_up_down_userpoints_add($op, $edit = array(), &$node) {
         'batchable' => FALSE,
         'configurable' => FALSE,
       );
+
     case 'do':
       userpoints_userpointsapi('points', variable_get('userpoints_actions', 0), $node->uid);
       watchdog('action', t('Awarded userpoint to author of node id %id', array('%id' => intval($node->nid))));
       break;
+
+    // return an HTML config form for the action
+    case 'form':
+      return '';
+
+    // validate the HTML form
+    case 'validate':
+      return TRUE;
+
     // process the HTML form to store configuration
     case 'submit':
       return '';
@@ -113,7 +123,7 @@ function action_vote_up_down_userpoints_add($op, $edit = array(), &$node) {
  * Deduct userpoint from node author.
  */
 function action_vote_up_down_userpoints_remove($op, $edit = array(), &$node) {
-  switch($op) {
+  switch ($op) {
     case 'metadata':
       return array(
         'description' => t('Deduct userpoint from node author (Vote up/down)'),
@@ -121,10 +131,20 @@ function action_vote_up_down_userpoints_remove($op, $edit = array(), &$node) {
         'batchable' => FALSE,
         'configurable' => FALSE,
       );
+
     case 'do':
       userpoints_userpointsapi('points', -variable_get('userpoints_actions', 0), $node->uid);
       watchdog('action', t('Deducted userpoint from author of node id %id', array('%id' => intval($node->nid))));
       break;
+
+    // return an HTML config form for the action
+    case 'form':
+      return '';
+
+    // validate the HTML form
+    case 'validate':
+      return TRUE;
+
     // process the HTML form to store configuration
     case 'submit':
       return '';

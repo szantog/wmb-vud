@@ -45,7 +45,7 @@ function vote_storylink_perm() {
 function vote_storylink_access($op, $node) {
   global $user;
 
-  switch($op) {
+  switch ($op) {
     case 'view':
       return $node->status && user_access('view storylinks');
     case 'create':
@@ -78,14 +78,14 @@ function vote_storylink_menu($may_cache) {
   if ($may_cache) {
     $items[] = array(
       'path' => 'storylink',
-      'title' => t('story links'),
+      'title' => t('Story links'),
       'callback' => 'vote_storylink_page',
       'access' => user_access('access content'),
       'type' => MENU_CALLBACK
     );
     $items[] = array(
       'path' => 'storylink/'. $user->uid,
-      'title' => t('my story links'),
+      'title' => t('My story links'),
       'access' => user_access('create storylinks'),
       'type' => MENU_DYNAMIC_ITEM
     );
@@ -115,10 +115,10 @@ function vote_storylink_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'rss item':
       if ($node->type == 'storylink' && variable_get('feed_item_length', 'teaser') == 'teaser') {
-        $node->teaser .= '<p><a href="'. check_url($node->vote_storylink_url) .'" title="'. t('Go to the original news source.') .'">'. t('original news source') .'</a></p>';
+        $node->teaser .= '<p><a href="'. check_url($node->vote_storylink_url) .'" title="'. t('Go to the original news source.') .'">'. t('Original news source') .'</a></p>';
       }
       elseif ($node->type == 'storylink' && variable_get('feed_item_length', 'teaser') == 'fulltext') {
-        $node->body .= '<p><a href="'. check_url($node->vote_storylink_url) .'" title="'. t('Go to the original news source.') .'">'. t('original news source') .'</a></p>';
+        $node->body .= '<p><a href="'. check_url($node->vote_storylink_url) .'" title="'. t('Go to the original news source.') .'">'. t('Original news source') .'</a></p>';
       }
       break;
   }
@@ -156,7 +156,7 @@ function vote_storylink_form(&$node, &$param) {
     '#default_value' => $node->body,
     '#required' => FALSE,
     '#rows' => 5,
-    '#maxlength' => 300,
+    '#maxlength' => 600,
     '#resizable' => TRUE,
     '#description' => t('A short description of the story. It should be around 2 to 4 sentences.'),
     '#weight' => -16,
@@ -173,7 +173,7 @@ function vote_storylink_form(&$node, &$param) {
 function vote_storylink_view($node, $teaser = FALSE, $page = FALSE) {
   if ($page) {
     // Breadcrumb navigation
-    $breadcrumb[] = array('path' => 'storylink', 'title' => t('story links'));
+    $breadcrumb[] = array('path' => 'storylink', 'title' => t('Story links'));
     $breadcrumb[] = array('path' => 'storylink/'. $node->uid, 'title' => t("@name's story links", array('@name' => $node->name)));
     $breadcrumb[] = array('path' => 'node/'. $node->nid);
     menu_set_location($breadcrumb);
@@ -375,7 +375,7 @@ function vote_storylink_page($a = NULL, $b = NULL, $c = NULL) {
  * Display views of the storylinks
  */
 function vote_storylink_page_new() {
-  drupal_set_title($title = t('new story links'));
+  drupal_set_title($title = t('New story links'));
   $sql = db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC");
   $result = pager_query($sql, variable_get('default_nodes_main', 10));
   while ($node = db_fetch_object($result)) {
@@ -384,16 +384,14 @@ function vote_storylink_page_new() {
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url('storylink/new/feed'));
 
-  drupal_add_link(array('rel' => 'alternate',
-                        'type' => 'application/rss+xml',
-                        'title' => t('RSS - @title', array('@title' => $title)),
-                        'href' => url('storylink/new/feed')));
+  $feed_url = url('storylink/new/feed', NULL, NULL, TRUE);
+  drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
   return $output;
 }
 
 function vote_storylink_page_queue() {
-  drupal_set_title($title = t('queue story links'));
+  drupal_set_title($title = t('Queue story links'));
   $sql = db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE n.type = 'storylink' AND n.status = 1 AND n.promote = 0 ORDER BY n.created DESC");
   $result = pager_query($sql, variable_get('default_nodes_main', 10));
   while ($node = db_fetch_object($result)) {
@@ -402,16 +400,14 @@ function vote_storylink_page_queue() {
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url('storylink/queue/feed'));
 
-  drupal_add_link(array('rel' => 'alternate',
-                        'type' => 'application/rss+xml',
-                        'title' => t('RSS - @title', array('@title' => $title)),
-                        'href' => url('storylink/queue/feed')));
+  $feed_url = url('storylink/queue/feed', NULL, NULL, TRUE);
+  drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
   return $output;
 }
 
 function vote_storylink_page_top() {
-  drupal_set_title($title = t('popular story links'));
+  drupal_set_title($title = t('Popular story links'));
   $sql = db_rewrite_sql("SELECT n.nid, n.created, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC");
   $result = pager_query($sql, variable_get('default_nodes_main', 10));
   while ($node = db_fetch_object($result)) {
@@ -420,16 +416,14 @@ function vote_storylink_page_top() {
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url('storylink/top/feed'));
 
-  drupal_add_link(array('rel' => 'alternate',
-                        'type' => 'application/rss+xml',
-                        'title' => t('RSS - @title', array('@title' => $title)),
-                        'href' => url('storylink/top/feed')));
+  $feed_url = url('storylink/top/feed', NULL, NULL, TRUE);
+  drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
   return $output;
 }
 
 function vote_storylink_page_interval_top($interval) {
-  drupal_set_title($title = t('popular story links this @epoch', array('@epoch' => t($interval))));
+  drupal_set_title($title = t('Popular story links this @epoch', array('@epoch' => t($interval))));
   $epoch = strtotime("-1 $interval");
   $sql = db_rewrite_sql("SELECT n.nid, n.created, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND n.created >= %d AND v.tag = 'vote' AND v.function = 'sum' ORDER BY v.value DESC, n.created DESC");
   $result = pager_query($sql, variable_get('default_nodes_main', 10), 0, NULL, $epoch);
@@ -439,10 +433,8 @@ function vote_storylink_page_interval_top($interval) {
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url("storylink/top/$interval/feed"));
 
-  drupal_add_link(array('rel' => 'alternate',
-                        'type' => 'application/rss+xml',
-                        'title' => t('RSS - @title', array('@title' => $title)),
-                        'href' => url("storylink/top/$interval/feed")));
+  $feed_url = url("storylink/top/$interval/feed", NULL, NULL, TRUE);
+  drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
   return $output;
 }
@@ -465,10 +457,9 @@ function vote_storylink_page_user($uid) {
     $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
     $output .= theme('feed_icon', url("storylink/$account->uid/feed"));
 
-    drupal_add_link(array('rel' => 'alternate',
-                          'type' => 'application/rss+xml',
-                          'title' => t('RSS - @title', array('@title' => $title)),
-                          'href' => url("storylink/$account->uid/feed")));
+    $feed_url = url("storylink/$account->uid/feed", NULL, NULL, TRUE);
+    drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
+
     return $output;
   }
   else {
