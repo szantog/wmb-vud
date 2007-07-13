@@ -220,7 +220,7 @@ function vote_up_down_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
             '#weight' => -10,
           );
         }
-        else if (variable_get('vote_up_down_widget_node', 0) > 1) {
+        else if (!$teaser && variable_get('vote_up_down_widget_node', 0) > 1) {
           $node->content['vote_up_down'] = array(
             '#value' => theme("vote_up_down_widget$style", $node->nid, 'node'),
             '#weight' => -10,

@@ -151,4 +151,74 @@ function action_vote_up_down_userpoints_remove($op, $edit = array(), &$node) {
   }
 }
 
-?>
+/**
+ * Touches the creation date of a node. Useful for moderated nodes that should appear
+ * 'fresh' as soon as they're promoted.
+ */
+function action_vote_up_down_node_touch_created($op, $edit = array(), &$node) {
+  switch ($op) {
+    case 'metadata':
+      return array(
+        'description' => t('Touch node creation date (Vote up/down)'),
+        'type' => t('Node'),
+        'batchable' => TRUE,
+        'configurable' => FALSE,
+      );
+
+    case 'do':
+      $node->created = time();
+      if (!$edit['defer']) {
+        node_save($node);
+      }
+      watchdog('action', t('Touched creation date of node id %id', array('%id' => intval($node->nid))));
+      break;
+
+    // return an HTML config form for the action
+    case 'form':
+      return '';
+
+    // validate the HTML form
+    case 'validate':
+      return TRUE;
+
+    // process the HTML form to store configuration
+    case 'submit':
+      return '';
+  }
+}
+
+/**
+ * Touches the change date of a node. Useful for moderated nodes that should appear
+ * 'fresh' as soon as they're promoted.
+ */
+function action_vote_up_down_node_touch_changed($op, $edit = array(), &$node) {
+  switch ($op) {
+    case 'metadata':
+      return array(
+        'description' => t('Touch node change date (Vote up/down)'),
+        'type' => t('Node'),
+        'batchable' => TRUE,
+        'configurable' => FALSE,
+      );
+
+    case 'do':
+      $node->changed = time();
+      if (!$edit['defer']) {
+        node_save($node);
+      }
+      watchdog('action', t('Touched change date of node id %id', array('%id' => intval($node->nid))));
+      break;
+
+    // return an HTML config form for the action
+    case 'form':
+      return '';
+
+    // validate the HTML form
+    case 'validate':
+      return TRUE;
+
+    // process the HTML form to store configuration
+    case 'submit':
+      return '';
+  }
+}

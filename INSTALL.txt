@@ -10,7 +10,8 @@ Requirements:
 
 You will need to download the following items:
   * Vote Up/Down Package http://drupal.org/project/vote_up_down
-  * Links Package http://drupal.org/project/links (only needed with storylink module)
+  * Links Package http://drupal.org/project/links
+    (only needed with storylink module)
   * Voting API http://drupal.org/project/votingapi
 
 To be able to automatically promote story links that have a specified
