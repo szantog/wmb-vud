@@ -259,9 +259,9 @@ function vote_storylink_link($type, $node = NULL, $teaser = FALSE) {
 
   if ($teaser && $type == 'node' && $node->type == 'storylink') {
     $links['vote_storylink'] = array(
-      'title' => t('Full story'),
+      'title' => t('More info'),
       'href' => 'node/'. $node->nid,
-      'attributes' => array('title' => t('Read the full story.'))
+      'attributes' => array('title' => t('More information about this post.'))
     );
   }
 
@@ -538,7 +538,7 @@ function theme_vote_storylink_via($link_url) {
  */
 function _vote_storylink_valid_url($formelement, $fieldname) {
   $url = $formelement['#value'];
-  if (!preg_match('/^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6}((:[0-9]{1,5})?\/.*)?$/i', $url)) {
+  if (!preg_match('/^(http|https):\/\/[a-z0-9]+([\-\.]{1,2}[a-z0-9]+)*\.[a-z]{2,6}((:[0-9]{1,5})?\/.*)?$/i', $url)) {
     form_set_error($fieldname, t('The URL is not valid.'));
   }
 }
