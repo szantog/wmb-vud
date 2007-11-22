@@ -221,7 +221,7 @@ function vote_storylink_prepare(&$node) {
 function vote_storylink_validate(&$node) {
   vote_storylink_node_build($node);
   if ($nid = db_result(db_query("SELECT ln.nid FROM {links} l INNER JOIN {links_node} ln ON l.lid = ln.lid WHERE ln.nid != %d AND LOWER(l.url) = LOWER('%s')", $node->nid, $node->vote_storylink_url))) {
-    form_set_error('vote_storylink_url', t('This story is already submitted. %clickhere to view and vote on it.', array('%clickhere' => l('Click here', 'node/'. $nid))));
+    form_set_error('vote_storylink_url', t('This story is already submitted. !clickhere to view and vote on it.', array('!clickhere' => l('Click here', 'node/'. $nid))));
   }
 }
 
