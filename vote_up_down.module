@@ -1,6 +1,92 @@
 <?php
 // $Id$
 
+/* TODO Automatically add Drupal.settings.basePath
+   In Drupal 5, you would have to add the base path to Drupal.settings yourself
+   if you needed it (it's needed for just about every AHAH/AJAX enabled module
+   if you did it right). Now in Drupal 6, it's added automatically. You can always
+   find it at Drupal.settings.basePath (actually, as soon as drupal_add_js() is
+   called at least once, so this is similar to the way we automatically add
+   drupal.js and jquery.js. */
+
+/* TODO FormAPI image buttons are now supported.
+   FormAPI now offers the 'image_button' element type, allowing developers to
+   use icons or other custom images in place of traditional HTML submit buttons.
+
+$form['my_image_button'] = array(
+  '#type'         => 'image_button',
+  '#title'        => t('My button'),
+  '#return_value' => 'my_data',
+  '#src'          => 'my/image/path.jpg',
+); */
+
+/* TODO New user_mail_tokens() method may be useful.
+   user.module now provides a user_mail_tokens() function to return an array
+   of the tokens available for the email notification messages it sends when
+   accounts are created, activated, blocked, etc. Contributed modules that
+   wish to make use of the same tokens for their own needs are encouraged
+   to use this function. */
+
+/* TODO
+   There is a new hook_watchdog in core. This means that contributed modules
+   can implement hook_watchdog to log Drupal events to custom destinations.
+   Two core modules are included, dblog.module (formerly known as watchdog.module),
+   and syslog.module. Other modules in contrib include an emaillog.module,
+   included in the logging_alerts module. See syslog or emaillog for an
+   example on how to implement hook_watchdog.
+function example_watchdog($log = array()) {
+  if ($log['severity'] == WATCHDOG_ALERT) {
+    mysms_send($log['user']->uid,
+      $log['type'],
+      $log['message'],
+      $log['variables'],
+      $log['severity'],
+      $log['referer'],
+      $log['ip'],
+      format_date($log['timestamp']));
+  }
+} */
+
+/* TODO Implement the hook_theme registry. Combine all theme registry entries
+   into one hook_theme function in each corresponding module file.
+function vote_up_down_theme() {
+  return array(
+    'vote_up_down_widget' => array(
+      'file' => 'vote_up_down.module',
+      'arguments' => array(
+        'cid' => NULL,
+        'type' => NULL,
+      ),
+    ),
+    'vote_up_down_widget_alt' => array(
+      'file' => 'vote_up_down.module',
+      'arguments' => array(
+        'cid' => NULL,
+        'type' => NULL,
+      ),
+    ),
+    'vote_up_down_points' => array(
+      'file' => 'vote_up_down.module',
+      'arguments' => array(
+        'cid' => NULL,
+        'type' => NULL,
+        'nodelink' => FALSE,
+      ),
+    ),
+    'vote_up_down_points_alt' => array(
+      'file' => 'vote_up_down.module',
+      'arguments' => array(
+        'cid' => NULL,
+        'type' => NULL,
+      ),
+    ),
+  );
+} */
+
+/* TODO
+   An argument for replacements has been added to format_plural(),
+   escaping and/or theming the values just as done with t().*/
+
 /**
  * @file
  * vote_up_down is a module that adds a widget for +1/-1 votes on nodes.
@@ -9,18 +95,18 @@
  */
 
 /* if (module_exists('views')) { */
-/*   include_once('vote_up_down_views.inc'); */
+/*   module_load_include('inc', 'vote_up_down', 'ote_up_down_views'); */
 /* } */
 
 if (module_exists('actions')) {
-  include_once('vote_up_down_actions.inc');
+  module_load_include('inc', 'vote_up_down', 'ote_up_down_actions');
 }
 
 /**
  * Implementation of hook_help().
  */
-function vote_up_down_help($section) {
-  switch ($section) {
+function vote_up_down_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#vote_up_down':
       return t('<p>This module is used to add a up/down vote widget to selected node types, part of Vote up/down.</p>');
   }
@@ -140,59 +226,73 @@ function vote_up_down_admin_settings() {
 /**
  * Implementation of hook_menu().
  */
-function vote_up_down_menu($may_cache) {
+function vote_up_down_menu() {
   $items = array();
 
+/* TODO
+   Non menu code that was placed in hook_menu under the '!$may_cache' block
+   so that it could be run during initialization, should now be moved to hook_init.
+   Previously we called hook_init twice, once early in the bootstrap process, second
+   just after the bootstrap has finished. The first instance is now called boot
+   instead of init.
+   
+   In Drupal 6, there are now two hooks that can be used by modules to execute code
+   at the beginning of a page request. hook_boot() replaces hook_boot() in Drupal 5
+   and runs on each page request, even for cached pages. hook_boot() now only runs
+   for non-cached pages and thus can be used for code that was previously placed in
+   hook_menu() with $may_cache = FALSE:
+   
+   Dynamic menu items under a '!$may_cache' block can often be simplified
+   to remove references to arg(n) and use of '%<function-name>' to check
+   conditions. See http://drupal.org/node/103114.
+   
+   The title and description arguments should not have strings wrapped in t(),
+   because translation of these happen in a later stage in the menu system.
+*/
   if ($may_cache) {
-    $items[] = array(
-      'path' => 'admin/settings/voteupdown',
-      'title' => t('Vote up/down'),
-      'description' => t('Control the functions of Vote up/down.'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => 'vote_up_down_admin_settings',
-      'access' => user_access('administer up-down vote'),
+    $items['admin/settings/voteupdown'] = array(
+      'title' => 'Vote up/down',
+      'description' => 'Control the functions of Vote up/down.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => 'vote_up_down_admin_settings',
+      'access arguments' => array('administer up-down vote'),
       'type' => MENU_NORMAL_ITEM
     );
-    $items[] = array(
-      'path' => 'vote_up_down',
-      'title' => t('Vote on content'),
-      'callback' => 'vote_up_down_vote',
-      'access' => user_access('use up-down vote'),
+    $items['vote_up_down'] = array(
+      'title' => 'Vote on content',
+      'page callback' => 'vote_up_down_vote',
+      'access arguments' => array('use up-down vote'),
       'type' => MENU_CALLBACK
     );
   }
   else {
-    $items[] = array(
-      'path' => 'voteupdown',
-      'title' => t('Vote up/down'),
-      'description' => t('Vote up/down vote summaries.'),
-      'callback' => 'vote_up_down_page',
-      'access' => user_access('access up-down vote statistic'),
+    $items['voteupdown'] = array(
+      'title' => 'Vote up/down',
+      'description' => 'Vote up/down vote summaries.',
+      'page callback' => 'vote_up_down_page',
+      'access arguments' => array('access up-down vote statistic'),
     );
-    $items[] = array(
-      'path' => 'voteupdown/usersvotes',
-      'title' => t('Users by votes'),
-      'callback' => 'vote_up_down_page',
-      'access' => user_access('access up-down vote statistic'),
+    $items['voteupdown/usersvotes'] = array(
+      'title' => 'Users by votes',
+      'page callback' => 'vote_up_down_page',
+      'access arguments' => array('access up-down vote statistic'),
     );
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(arg(1));
       $vote_access = (user_access('access up-down vote statistic') && in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE));
-      $items[] = array(
-        'path' => 'node/'. arg(1) .'/votesupdown',
-        'title' => t('Votes'),
-        'callback' => 'vote_up_down_tracker',
-        'access' => $vote_access,
+      $items['node/'. '%' .'/votesupdown'] = array(
+        'title' => 'Votes',
+        'page callback' => 'vote_up_down_tracker',
+        'access arguments' => $vote_access,
         'weight' => 5,
         'type' => MENU_LOCAL_TASK
       );
     }
     if (arg(0) == 'user' && is_numeric(arg(1))) {
-      $items[] = array(
-        'path' => 'user/'. arg(1) .'/votesupdown',
-        'title' => t('Votes'),
-        'callback' => 'vote_up_down_user_votes',
-        'access' => user_access('access up-down vote statistic'),
+      $items['user/'. '%' .'/votesupdown'] = array(
+        'title' => 'Votes',
+        'page callback' => 'vote_up_down_user_votes',
+        'access arguments' => array('access up-down vote statistic'),
         'weight' => 5,
         'type' => MENU_LOCAL_TASK
       );
@@ -555,8 +655,16 @@ function theme_vote_up_down_widget($cid, $type) {
         $class2 = 'vote-down-inact';
       }
 
-      $output .= '<span id="vote_up_'. $type .'_'. $cid .'" class="'. $class .'" title="'. url("vote_up_down/$type/$cid/1/1") .'">'. l('', "vote_up_down/$type/$cid/1", array('class' => $class, 'title' => t('Vote up')), drupal_get_destination(), NULL, FALSE, TRUE) .'</span>';
-      $output .= '<span id="vote_down_'. $type .'_'. $cid .'" class="'. $class2 .'" title="'. url("vote_up_down/$type/$cid/-1/1") .'">'. l('', "vote_up_down/$type/$cid/-1", array('class' => $class2, 'title' => t('Vote down')), drupal_get_destination(), NULL, FALSE, TRUE) .'</span>';
+      $output .= '<span id="vote_up_'. $type .'_'. $cid .'" class="'. $class .'" title="'. url("vote_up_down/$type/$cid/1/1") .'">'. /* TODO
+   Please manually fix the parameters on the l() or url() function on the next line.
+   Typically, this was not changed because of a function call inside an array call like
+   array('title' => t('View user profile.')).*/
+l('', "vote_up_down/$type/$cid/1", array('class' => $class, 'title' => t('Vote up')), drupal_get_destination(), NULL, FALSE, TRUE) .'</span>';
+      $output .= '<span id="vote_down_'. $type .'_'. $cid .'" class="'. $class2 .'" title="'. url("vote_up_down/$type/$cid/-1/1") .'">'. /* TODO
+   Please manually fix the parameters on the l() or url() function on the next line.
+   Typically, this was not changed because of a function call inside an array call like
+   array('title' => t('View user profile.')).*/
+l('', "vote_up_down/$type/$cid/-1", array('class' => $class2, 'title' => t('Vote down')), drupal_get_destination(), NULL, FALSE, TRUE) .'</span>';
     }
     else {
       $output .= '<span class="up-inact" title="'. t('You must login to vote.') .'"></span>';
@@ -587,7 +695,11 @@ function theme_vote_up_down_widget_alt($cid, $type) {
         $class = 'vote-up-inact';
       }
 
-      $output .= '<span id="vote_up_'. $type .'_'. $cid .'" class="'. $class .'" title="'. url("vote_up_down/$type/$cid/1/1/1") .'">'. l('', "vote_up_down/$type/$cid/1", array('class' => $class, 'title' => t('Vote')), drupal_get_destination(), NULL, FALSE, TRUE) .'</span>';
+      $output .= '<span id="vote_up_'. $type .'_'. $cid .'" class="'. $class .'" title="'. url("vote_up_down/$type/$cid/1/1/1") .'">'. /* TODO
+   Please manually fix the parameters on the l() or url() function on the next line.
+   Typically, this was not changed because of a function call inside an array call like
+   array('title' => t('View user profile.')).*/
+l('', "vote_up_down/$type/$cid/1", array('class' => $class, 'title' => t('Vote')), drupal_get_destination(), NULL, FALSE, TRUE) .'</span>';
 
     }
     else {
@@ -655,7 +767,7 @@ function _vote_up_down_get_uid() {
     // Fake uid for anonymous users.
     // If the IP is valid turn it into a integer and add the number of the current day.
     // The current day is what limit anonymous voting to one vote per day and IP address.
-    $hostname = (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+    $hostname = (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : ip_address();
     if ($long = ip2long($hostname)) {
       $uid = abs($long) + date('z');
     }

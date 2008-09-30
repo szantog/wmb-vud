@@ -1,6 +1,101 @@
 <?php
 // $Id$
 
+/* TODO hook_submit() has been removed
+   In Drupal 5.x, hook_submit() allowed node modules to alter the node before
+   saving it to the database (it was run between hook_validate() and
+   hook_insert()/hook_update()). In Drupal 6.x this hook has been removed.
+   Instead, you should attach a submit handler to the form created in hook_form(),
+   and then alter the $form_state['values'] array as needed.
+   A submit handler would look like:
+   $form['#submit'] = array('mymodule_node_form_submit_handler'); */
+
+/* TODO Use drupal_set_breadcrumb() instead of menu_set_location() to set
+   custom breadcrumbs.
+   Currently in D5, menu_set_location() is 'misused' in several modules to set
+   a custom breadcrumb, drupal_set_breadcrumb() should be used instead, as
+   discussed in #177497.
+   Note, when using drupal_set_breadcrumb(), you need to include 'home' but
+   not the current page.
+   Alternatively, if you do want to set the current location in the menu tree
+   as well as affect breadcrumbs, use menu_set_item(). */
+
+/* TODO FormAPI image buttons are now supported.
+   FormAPI now offers the 'image_button' element type, allowing developers to
+   use icons or other custom images in place of traditional HTML submit buttons.
+
+$form['my_image_button'] = array(
+  '#type'         => 'image_button',
+  '#title'        => t('My button'),
+  '#return_value' => 'my_data',
+  '#src'          => 'my/image/path.jpg',
+); */
+
+/* TODO Remove $row argument from db_result() method
+   The $row argument of db_result() was removed from the database abstraction
+   layer in 6.x core, as it was a database dependent option. Developers need to
+   use other handling to replace the needs of this method. */
+
+/* TODO node_feed() parameters changed
+   node_feed() now accepts an array of nids (i.e. integers), and not a database
+   result object. this is more flexible for callers but sometimes slighly less
+   efficient. */
+
+/* TODO hook_user('view')
+   The return value of hook_user('view') has changed, to match the process that
+   nodes use for rendering. Modules should add their custom HTML to
+   $account->content element. Further, this HTML should be in the form that
+   drupal_render() recognizes. */
+
+/* TODO Node previews and adding form fields to the node form.
+   There is a subtle but important difference in the way node previews (and other
+   such operations) are carried out when adding or editing a node. With the new
+   Forms API, the node form is handled as a multi-step form. When the node form
+   is previewed, all the form values are submitted, and the form is rebuilt with
+   those form values put into $form['#node']. Thus, form elements that are added
+   to the node form will lose any user input unless they set their '#default_value'
+   elements using this embedded node object. */
+
+/* TODO New user_mail_tokens() method may be useful.
+   user.module now provides a user_mail_tokens() function to return an array
+   of the tokens available for the email notification messages it sends when
+   accounts are created, activated, blocked, etc. Contributed modules that
+   wish to make use of the same tokens for their own needs are encouraged
+   to use this function. */
+
+/* TODO
+   There is a new hook_watchdog in core. This means that contributed modules
+   can implement hook_watchdog to log Drupal events to custom destinations.
+   Two core modules are included, dblog.module (formerly known as watchdog.module),
+   and syslog.module. Other modules in contrib include an emaillog.module,
+   included in the logging_alerts module. See syslog or emaillog for an
+   example on how to implement hook_watchdog.
+function example_watchdog($log = array()) {
+  if ($log['severity'] == WATCHDOG_ALERT) {
+    mysms_send($log['user']->uid,
+      $log['type'],
+      $log['message'],
+      $log['variables'],
+      $log['severity'],
+      $log['referer'],
+      $log['ip'],
+      format_date($log['timestamp']));
+  }
+} */
+
+/* TODO Implement the hook_theme registry. Combine all theme registry entries
+   into one hook_theme function in each corresponding module file.
+function vote_storylink_theme() {
+  return array(
+    'vote_storylink_via' => array(
+      'file' => 'vote_storylink.module',
+      'arguments' => array(
+        'link_url' => NULL,
+      ),
+    ),
+  );
+} */
+
 /*
  * @file
  * vote_storylink defines a "storylink" node type.
@@ -10,8 +105,8 @@
 /**
  * Implementation of hook_help().
  */
-function vote_storylink_help($section) {
-  switch ($section) {
+function vote_storylink_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#vote_storylink':
       return t('<p>This module is used to create articles that links to other resources -- websites, pages, documents, etc., part of Vote up/down.</p>');
   }
@@ -42,17 +137,17 @@ function vote_storylink_perm() {
 /**
  * Implementation of hook_access().
  */
-function vote_storylink_access($op, $node) {
-  global $user;
+function vote_storylink_access($op, $node, $account) {
+
 
   switch ($op) {
     case 'view':
-      return $node->status && user_access('view storylinks');
+      return $node->status && user_access('view storylinks', $account);
     case 'create':
-      return user_access('create storylinks');
+      return user_access('create storylinks', $account);
     case 'update':
     case 'delete':
-      return user_access('edit own storylinks') && ($user->uid == $node->uid);
+      return user_access('edit own storylinks', $account) && ($account->uid == $node->uid);
   }
 }
 
@@ -71,22 +166,40 @@ that module, and enable if needed, in the !modules.',array('!modules'=>l(t('modu
 /**
  * Implementation of hook_menu().
  */
-function vote_storylink_menu($may_cache) {
+function vote_storylink_menu() {
   global $user;
   $items = array();
 
+/* TODO
+   Non menu code that was placed in hook_menu under the '!$may_cache' block
+   so that it could be run during initialization, should now be moved to hook_init.
+   Previously we called hook_init twice, once early in the bootstrap process, second
+   just after the bootstrap has finished. The first instance is now called boot
+   instead of init.
+   
+   In Drupal 6, there are now two hooks that can be used by modules to execute code
+   at the beginning of a page request. hook_boot() replaces hook_boot() in Drupal 5
+   and runs on each page request, even for cached pages. hook_boot() now only runs
+   for non-cached pages and thus can be used for code that was previously placed in
+   hook_menu() with $may_cache = FALSE:
+   
+   Dynamic menu items under a '!$may_cache' block can often be simplified
+   to remove references to arg(n) and use of '%<function-name>' to check
+   conditions. See http://drupal.org/node/103114.
+   
+   The title and description arguments should not have strings wrapped in t(),
+   because translation of these happen in a later stage in the menu system.
+*/
   if ($may_cache) {
-    $items[] = array(
-      'path' => 'storylink',
-      'title' => t('Story links'),
-      'callback' => 'vote_storylink_page',
-      'access' => user_access('access content'),
+    $items['storylink'] = array(
+      'title' => 'Story links',
+      'page callback' => 'vote_storylink_page',
+      'access arguments' => array('access content'),
       'type' => MENU_CALLBACK
     );
-    $items[] = array(
-      'path' => 'storylink/'. $user->uid,
-      'title' => t('My story links'),
-      'access' => user_access('create storylinks'),
+    $items['storylink/'. $user->uid] = array(
+      'title' => 'My story links',
+      'access arguments' => array('create storylinks'),
       'type' => MENU_DYNAMIC_ITEM
     );
   }
@@ -101,7 +214,11 @@ function vote_storylink_user($type, &$edit, &$account, $category = NULL) {
   if ($type == 'view' && user_access('create storylinks', $account)) {
     $items[] = array(
       'title' => t('Story links'),
-      'value' => l(t('view recent story links'), "storylink/$account->uid", array('title' => t("Read @username's latest story links.", array('@username' => $account->name)))),
+      'value' => /* TODO
+   Please manually fix the parameters on the l() or url() function on the next line.
+   Typically, this was not changed because of a function call inside an array call like
+   array('title' => t('View user profile.')).*/
+l(t('view recent story links'), "storylink/$account->uid", array('title' => t("Read @username's latest story links.", array('@username' => $account->name)))),
       'class' => 'storylink',
     );
     return array(t('History') => $items);
@@ -146,7 +263,8 @@ function vote_storylink_form(&$node, &$param) {
     '#maxlength' => 256,
     '#required' => TRUE,
     '#description' => t('The URL/address of the story.'),
-    '#validate' => array('_vote_storylink_valid_url' => array('vote_storylink_url')),
+    '#validate' => array('_vote_storylink_valid_url'),
+    '#_vote_storylink_valid_url_param_1' => 'vote_storylink_url',
     '#weight' => -17,
   );
 
@@ -384,7 +502,7 @@ function vote_storylink_page_new() {
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url('storylink/new/feed'));
 
-  $feed_url = url('storylink/new/feed', NULL, NULL, TRUE);
+  $feed_url = url('storylink/new/feed', array('absolute' => TRUE));
   drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
   return $output;
@@ -400,7 +518,7 @@ function vote_storylink_page_queue() {
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url('storylink/queue/feed'));
 
-  $feed_url = url('storylink/queue/feed', NULL, NULL, TRUE);
+  $feed_url = url('storylink/queue/feed', array('absolute' => TRUE));
   drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
   return $output;
@@ -416,7 +534,7 @@ function vote_storylink_page_top() {
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url('storylink/top/feed'));
 
-  $feed_url = url('storylink/top/feed', NULL, NULL, TRUE);
+  $feed_url = url('storylink/top/feed', array('absolute' => TRUE));
   drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
   return $output;
@@ -433,7 +551,7 @@ function vote_storylink_page_interval_top($interval) {
   $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
   $output .= theme('feed_icon', url("storylink/top/$interval/feed"));
 
-  $feed_url = url("storylink/top/$interval/feed", NULL, NULL, TRUE);
+  $feed_url = url("storylink/top/$interval/feed", array('absolute' => TRUE));
   drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
   return $output;
@@ -457,7 +575,7 @@ function vote_storylink_page_user($uid) {
     $output .= theme('pager', NULL, variable_get('default_nodes_main', 10));
     $output .= theme('feed_icon', url("storylink/$account->uid/feed"));
 
-    $feed_url = url("storylink/$account->uid/feed", NULL, NULL, TRUE);
+    $feed_url = url("storylink/$account->uid/feed", array('absolute' => TRUE));
     drupal_add_feed($feed_url, t('RSS - @title', array('@title' => $title)));
 
     return $output;
@@ -474,7 +592,7 @@ function vote_storylink_feed_new() {
   $sql = db_rewrite_sql("SELECT n.nid, n.title, n.created, r.teaser FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid WHERE n.type = 'storylink' AND n.status = 1 ORDER BY n.created DESC");
   $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' new';
-  $channel['link'] = url('storylink/new', NULL, NULL, TRUE);
+  $channel['link'] = url('storylink/new', array('absolute' => TRUE));
   $channel['description'] = t('New storylinks');
   node_feed($result, $channel);
 }
@@ -483,7 +601,7 @@ function vote_storylink_feed_queue() {
   $sql = db_rewrite_sql("SELECT n.nid, n.title, n.created, r.teaser FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid WHERE n.type = 'storylink' AND n.status = 1 AND n.promote = 0 ORDER BY n.created DESC");
   $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' queue';
-  $channel['link'] = url('storylink/queue', NULL, NULL, TRUE);
+  $channel['link'] = url('storylink/queue', array('absolute' => TRUE));
   $channel['description'] = t('Queued storylinks');
   node_feed($result, $channel);
 }
@@ -492,7 +610,7 @@ function vote_storylink_feed_top() {
   $sql = db_rewrite_sql("SELECT n.nid, n.created, n.title, r.teaser, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND v.tag = 'vote' AND v.function = 'sum' AND v.content_type = 'node' ORDER BY v.value DESC, n.created DESC");
   $result = db_query_range($sql, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' popular';
-  $channel['link'] = url('storylink/top', NULL, NULL, TRUE);
+  $channel['link'] = url('storylink/top', array('absolute' => TRUE));
   $channel['description'] = t('Popular storylinks');
   node_feed($result, $channel);
 }
@@ -502,7 +620,7 @@ function vote_storylink_feed_interval_top($interval) {
   $sql = db_rewrite_sql("SELECT n.nid, n.created, n.title, r.teaser, v.content_id, v.value, v.tag, v.function FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid INNER JOIN {votingapi_cache} v ON n.nid = v.content_id WHERE n.type = 'storylink' AND n.status = 1 AND n.created >= %d AND v.tag = 'vote' AND v.function = 'sum' AND v.content_type = 'node' ORDER BY v.value DESC, n.created DESC");
   $result = db_query_range($sql, $epoch, 0, variable_get('feed_default_items', 10));
   $channel['title'] = variable_get('site_name', 'drupal') .' popular story links this '. $interval;
-  $channel['link'] = url("storylink/top/$interval", NULL, NULL, TRUE);
+  $channel['link'] = url("storylink/top/$interval", array('absolute' => TRUE));
   $channel['description'] = t('Popular storylinks');
   node_feed($result, $channel);
 }
@@ -519,7 +637,7 @@ function vote_storylink_feed_user($uid = 0) {
   $sql = db_rewrite_sql("SELECT n.nid, n.title, n.created, r.teaser, u.name, u.uid FROM {node} n INNER JOIN {node_revisions} r ON n.vid = r.vid INNER JOIN {users} u ON n.uid = u.uid WHERE n.type = 'storylink' AND u.uid = %d AND n.status = 1 ORDER BY n.created DESC");
   $result = db_query_range($sql, $uid, 0, variable_get('feed_default_items', 10));
   $channel['title'] = $account->name ."'s story links";
-  $channel['link'] = url("storylink/$uid", NULL, NULL, TRUE);
+  $channel['link'] = url("storylink/$uid", array('absolute' => TRUE));
   $channel['description'] = t('User storylinks');
   node_feed($result, $channel);
 }

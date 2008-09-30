@@ -5,6 +5,9 @@
  * Implementation of hook_uninstall().
  */
 function vote_up_down_uninstall() {
+  // Remove tables.
+  drupal_uninstall_schema('vote_up_down');
+
   variable_del('vote_up_down_node_types');
   variable_del('vote_up_down_widget_style_node');
   variable_del('vote_up_down_widget_node');

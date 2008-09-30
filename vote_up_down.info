@@ -1,5 +1,7 @@
 ; $Id$
 name = Vote up/down
 description = Adds a up/down vote widget to selected node types, part of Vote up/down.
-dependencies = votingapi
+dependencies[] = votingapi
 package = Voting
+
+core = 6.x
