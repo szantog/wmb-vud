@@ -1,85 +1,6 @@
 <?php
 // $Id$
 
-/* TODO Automatically add Drupal.settings.basePath
-   In Drupal 5, you would have to add the base path to Drupal.settings yourself
-   if you needed it (it's needed for just about every AHAH/AJAX enabled module
-   if you did it right). Now in Drupal 6, it's added automatically. You can always
-   find it at Drupal.settings.basePath (actually, as soon as drupal_add_js() is
-   called at least once, so this is similar to the way we automatically add
-   drupal.js and jquery.js. */
-
-/* TODO FormAPI image buttons are now supported.
-   FormAPI now offers the 'image_button' element type, allowing developers to
-   use icons or other custom images in place of traditional HTML submit buttons. */
-
-/* TODO New user_mail_tokens() method may be useful.
-   user.module now provides a user_mail_tokens() function to return an array
-   of the tokens available for the email notification messages it sends when
-   accounts are created, activated, blocked, etc. Contributed modules that
-   wish to make use of the same tokens for their own needs are encouraged
-   to use this function. */
-
-/* TODO
-   There is a new hook_watchdog in core. This means that contributed modules
-   can implement hook_watchdog to log Drupal events to custom destinations.
-   Two core modules are included, dblog.module (formerly known as watchdog.module),
-   and syslog.module. Other modules in contrib include an emaillog.module,
-   included in the logging_alerts module. See syslog or emaillog for an
-   example on how to implement hook_watchdog.
-function example_watchdog($log = array()) {
-  if ($log['severity'] == WATCHDOG_ALERT) {
-    mysms_send($log['user']->uid,
-      $log['type'],
-      $log['message'],
-      $log['variables'],
-      $log['severity'],
-      $log['referer'],
-      $log['ip'],
-      format_date($log['timestamp']));
-  }
-} */
-
-/* TODO Implement the hook_theme registry. Combine all theme registry entries
-   into one hook_theme function in each corresponding module file.
-function vote_up_down_theme() {
-  return array(
-    'vote_up_down_widget' => array(
-      'file' => 'vote_up_down.module',
-      'arguments' => array(
-        'cid' => NULL,
-        'type' => NULL,
-      ),
-    ),
-    'vote_up_down_widget_alt' => array(
-      'file' => 'vote_up_down.module',
-      'arguments' => array(
-        'cid' => NULL,
-        'type' => NULL,
-      ),
-    ),
-    'vote_up_down_points' => array(
-      'file' => 'vote_up_down.module',
-      'arguments' => array(
-        'cid' => NULL,
-        'type' => NULL,
-        'nodelink' => FALSE,
-      ),
-    ),
-    'vote_up_down_points_alt' => array(
-      'file' => 'vote_up_down.module',
-      'arguments' => array(
-        'cid' => NULL,
-        'type' => NULL,
-      ),
-    ),
-  );
-} */
-
-/* TODO
-   An argument for replacements has been added to format_plural(),
-   escaping and/or theming the values just as done with t().*/
-
 /**
  * @file
  * vote_up_down is a module that adds a widget for +1/-1 votes on nodes.
@@ -87,9 +8,9 @@ function vote_up_down_theme() {
  * It's based upon "simplevote.module".
  */
 
-/* if (module_exists('views')) { */
-/*   module_load_include('inc', 'vote_up_down', 'ote_up_down_views'); */
-/* } */
+// if (module_exists('views')) {
+//   module_load_include('inc', 'vote_up_down', 'ote_up_down_views');
+// }
 
 if (module_exists('actions')) {
   module_load_include('inc', 'vote_up_down', 'vote_up_down_actions');
@@ -133,7 +54,7 @@ function vote_up_down_admin_settings() {
   $form['vote_widget_settings_node'] = array(
     '#type' => 'fieldset',
     '#title' => t('Vote widget settings for nodes'),
-    '#description' => t('For more control over the voting widget placement it can be inserted directly in the theme, see the included template.php and node-storylink.tpl.php for an example. When this method is used turn off the widget display here.'),
+    '#description' => t('For more control over the voting widget placement it can be inserted directly in the theme, see the included template.php and node-storylink.tpl.php for an example. When this method is used, turn off the widget display here.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -226,7 +147,7 @@ function vote_up_down_menu() {
     'title' => 'Vote up/down',
     'description' => 'Control the functions of Vote up/down.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => 'vote_up_down_admin_settings',
+    'page arguments' => array('vote_up_down_admin_settings'),
     'access arguments' => array('administer vote up/down'),
     'type' => MENU_NORMAL_ITEM
   );
@@ -251,7 +172,7 @@ function vote_up_down_menu() {
     'access arguments' => array('access vote up/down statistics'),
   );
 
-  if (arg(0) == 'node' && is_numeric(arg(1))) {
+  /*  if (arg(0) == 'node' && is_numeric(arg(1))) {
     $node = node_load(arg(1));
     $vote_access = (user_access('access vote up/down statistics') && in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE));
     $items['node/'.'%'.'/votesupdown'] = array(
@@ -262,6 +183,7 @@ function vote_up_down_menu() {
       'type' => MENU_LOCAL_TASK
     );
   }
+  
 
   if (arg(0) == 'user' && is_numeric(arg(1))) {
     $items['user/'.'%'.'/votesupdown'] = array(
@@ -272,6 +194,9 @@ function vote_up_down_menu() {
       'type' => MENU_LOCAL_TASK
     );
   }
+  */
+
+  
 
   drupal_add_css(drupal_get_path('module', 'vote_up_down') .'/vote_up_down.css');
   drupal_add_js(drupal_get_path('module', 'vote_up_down') .'/ajax_vote_up_down.js');
