@@ -11,14 +11,7 @@
 
 /* TODO FormAPI image buttons are now supported.
    FormAPI now offers the 'image_button' element type, allowing developers to
-   use icons or other custom images in place of traditional HTML submit buttons.
-
-$form['my_image_button'] = array(
-  '#type'         => 'image_button',
-  '#title'        => t('My button'),
-  '#return_value' => 'my_data',
-  '#src'          => 'my/image/path.jpg',
-); */
+   use icons or other custom images in place of traditional HTML submit buttons. */
 
 /* TODO New user_mail_tokens() method may be useful.
    user.module now provides a user_mail_tokens() function to return an array
@@ -99,7 +92,7 @@ function vote_up_down_theme() {
 /* } */
 
 if (module_exists('actions')) {
-  module_load_include('inc', 'vote_up_down', 'ote_up_down_actions');
+  module_load_include('inc', 'vote_up_down', 'vote_up_down_actions');
 }
 
 /**
@@ -108,7 +101,7 @@ if (module_exists('actions')) {
 function vote_up_down_help($path, $arg) {
   switch ($path) {
     case 'admin/help#vote_up_down':
-      return t('<p>This module is used to add a up/down vote widget to selected node types, part of Vote up/down.</p>');
+      return t('<p>This module is used to add a up/down voting widget to selected node types. (Part of Vote up/down package)</p>');
   }
 }
 
@@ -116,7 +109,7 @@ function vote_up_down_help($path, $arg) {
  * Implementation of hook_perm().
  */
 function vote_up_down_perm() {
-  return array('view up-down vote', 'use up-down vote', 'access up-down vote statistic', 'administer up-down vote');
+  return array('view up/down votes', 'use vote up/down', 'access vote up/down statistics', 'administer vote up/down');
 }
 
 /**
@@ -229,78 +222,59 @@ function vote_up_down_admin_settings() {
 function vote_up_down_menu() {
   $items = array();
 
-/* TODO
-   Non menu code that was placed in hook_menu under the '!$may_cache' block
-   so that it could be run during initialization, should now be moved to hook_init.
-   Previously we called hook_init twice, once early in the bootstrap process, second
-   just after the bootstrap has finished. The first instance is now called boot
-   instead of init.
-   
-   In Drupal 6, there are now two hooks that can be used by modules to execute code
-   at the beginning of a page request. hook_boot() replaces hook_boot() in Drupal 5
-   and runs on each page request, even for cached pages. hook_boot() now only runs
-   for non-cached pages and thus can be used for code that was previously placed in
-   hook_menu() with $may_cache = FALSE:
-   
-   Dynamic menu items under a '!$may_cache' block can often be simplified
-   to remove references to arg(n) and use of '%<function-name>' to check
-   conditions. See http://drupal.org/node/103114.
-   
-   The title and description arguments should not have strings wrapped in t(),
-   because translation of these happen in a later stage in the menu system.
-*/
-  if ($may_cache) {
-    $items['admin/settings/voteupdown'] = array(
-      'title' => 'Vote up/down',
-      'description' => 'Control the functions of Vote up/down.',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => 'vote_up_down_admin_settings',
-      'access arguments' => array('administer up-down vote'),
-      'type' => MENU_NORMAL_ITEM
-    );
-    $items['vote_up_down'] = array(
-      'title' => 'Vote on content',
-      'page callback' => 'vote_up_down_vote',
-      'access arguments' => array('use up-down vote'),
-      'type' => MENU_CALLBACK
-    );
-  }
-  else {
-    $items['voteupdown'] = array(
-      'title' => 'Vote up/down',
-      'description' => 'Vote up/down vote summaries.',
-      'page callback' => 'vote_up_down_page',
-      'access arguments' => array('access up-down vote statistic'),
-    );
-    $items['voteupdown/usersvotes'] = array(
-      'title' => 'Users by votes',
-      'page callback' => 'vote_up_down_page',
-      'access arguments' => array('access up-down vote statistic'),
-    );
-    if (arg(0) == 'node' && is_numeric(arg(1))) {
-      $node = node_load(arg(1));
-      $vote_access = (user_access('access up-down vote statistic') && in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE));
-      $items['node/'. '%' .'/votesupdown'] = array(
-        'title' => 'Votes',
-        'page callback' => 'vote_up_down_tracker',
-        'access arguments' => $vote_access,
-        'weight' => 5,
-        'type' => MENU_LOCAL_TASK
-      );
-    }
-    if (arg(0) == 'user' && is_numeric(arg(1))) {
-      $items['user/'. '%' .'/votesupdown'] = array(
-        'title' => 'Votes',
-        'page callback' => 'vote_up_down_user_votes',
-        'access arguments' => array('access up-down vote statistic'),
-        'weight' => 5,
-        'type' => MENU_LOCAL_TASK
-      );
-    }
+  $items['admin/settings/voteupdown'] = array(
+    'title' => 'Vote up/down',
+    'description' => 'Control the functions of Vote up/down.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => 'vote_up_down_admin_settings',
+    'access arguments' => array('administer vote up/down'),
+    'type' => MENU_NORMAL_ITEM
+  );
 
-    drupal_add_css(drupal_get_path('module', 'vote_up_down') .'/vote_up_down.css');
-    drupal_add_js(drupal_get_path('module', 'vote_up_down') .'/ajax_vote_up_down.js');
+  $items['vote_up_down'] = array(
+    'title' => 'Vote on content',
+    'page callback' => 'vote_up_down_vote',
+    'access arguments' => array('use vote up/down'),
+    'type' => MENU_CALLBACK
+  );
+
+  $items['voteupdown'] = array(
+    'title' => 'Vote up/down',
+    'description' => 'Vote up/down vote summaries.',
+    'page callback' => 'vote_up_down_page',
+    'access arguments' => array('access vote up/down statistics'),
+  );
+
+  $items['voteupdown/usersvotes'] = array(
+    'title' => 'Users by votes',
+    'page callback' => 'vote_up_down_page',
+    'access arguments' => array('access vote up/down statistics'),
+  );
+
+  if (arg(0) == 'node' && is_numeric(arg(1))) {
+    $node = node_load(arg(1));
+    $vote_access = (user_access('access vote up/down statistics') && in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE));
+    $items['node/'.'%'.'/votesupdown'] = array(
+      'title' => 'Votes',
+      'page callback' => 'vote_up_down_tracker',
+      'access arguments' => $vote_access,
+      'weight' => 5,
+      'type' => MENU_LOCAL_TASK
+    );
   }
+
+  if (arg(0) == 'user' && is_numeric(arg(1))) {
+    $items['user/'.'%'.'/votesupdown'] = array(
+      'title' => 'Votes',
+      'page callback' => 'vote_up_down_user_votes',
+      'access arguments' => array('access vote up/down statistics'),
+      'weight' => 5,
+      'type' => MENU_LOCAL_TASK
+    );
+  }
+
+  drupal_add_css(drupal_get_path('module', 'vote_up_down') .'/vote_up_down.css');
+  drupal_add_js(drupal_get_path('module', 'vote_up_down') .'/ajax_vote_up_down.js');
 
   return $items;
 }
@@ -353,8 +327,8 @@ function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
   switch ($type) {
     case 'node':
       $node_type = in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE);
-      if ($node_type && user_access('view up-down vote')) {
-        if (variable_get('vote_up_down_reset_vote', 0) && user_access('use up-down vote')) {
+      if ($node_type && user_access('view up/down votes')) {
+        if (variable_get('vote_up_down_reset_vote', 0) && user_access('use vote up/down')) {
           $links['vote_up_down_reset'] = array(
             'title' => t('Reset vote'),
             'href' => "vote_up_down/$type/$node->nid/0",
@@ -371,7 +345,7 @@ function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
       }
       break;
     case 'comment':
-      if (variable_get('vote_up_down_reset_vote', 0) && user_access('use up-down vote') && variable_get('vote_up_down_widget_comment', 0)) {
+      if (variable_get('vote_up_down_reset_vote', 0) && user_access('use vote up/down') && variable_get('vote_up_down_widget_comment', 0)) {
         $links['vote_up_down_reset_c'] = array(
           'title' => t('Reset vote'),
           'href' => "vote_up_down/$type/$node->cid/0",
@@ -379,7 +353,7 @@ function vote_up_down_link($type, $node = NULL, $teaser = FALSE) {
           'query' => drupal_get_destination()
         );
       }
-      if (variable_get('vote_up_down_link_comment', 0) && user_access('view up-down vote')) {
+      if (variable_get('vote_up_down_link_comment', 0) && user_access('view up/down votes')) {
         $links['vote_up_down_points_c'] = theme('vote_up_down_points', $node->cid, $type, TRUE);
       }
       break;
@@ -444,7 +418,7 @@ function vote_up_down_userpoints($op, $points = 0, $uid = 0, $event = NULL, $des
           '#collapsed' => TRUE,
           '#title' => t('Vote up/down points'),
       );
-     
+
       $form['vote_updown_points']['userpoints_vote_up_down'] = array(
         '#type' => 'textfield',
         '#title' => t('Points for voting on a node (requires the Vote up/down module)'),
@@ -459,7 +433,7 @@ function vote_up_down_userpoints($op, $points = 0, $uid = 0, $event = NULL, $des
         '#size' => 5,
         '#maxlength' => 5,
       );
-      
+
       return $form;
       break;
   }
@@ -635,11 +609,11 @@ function vote_up_down_vote($type, $cid, $value, $ajax = FALSE, $alt = FALSE) {
 function theme_vote_up_down_widget($cid, $type) {
   global $user;
 
-  if (user_access('view up-down vote')) {
+  if (user_access('view up/down votes')) {
 
     $output = '<div class="vote-up-down-widget">';
 
-    if (user_access('use up-down vote') && ($user->uid || variable_get('vote_up_down_anonymous_vote', 0))) {
+    if (user_access('use vote up/down') && ($user->uid || variable_get('vote_up_down_anonymous_vote', 0))) {
       $user_vote = votingapi_get_user_votes($type, $cid, _vote_up_down_get_uid());
 
       if ($user_vote[0]->value > 0) {
@@ -680,12 +654,12 @@ l('', "vote_up_down/$type/$cid/-1", array('class' => $class2, 'title' => t('Vote
 function theme_vote_up_down_widget_alt($cid, $type) {
   global $user;
 
-  if (user_access('view up-down vote')) {
+  if (user_access('view up/down votes')) {
 
     $output = '<div class="vote-up-down-widget-alt">';
     $output .= theme('vote_up_down_points_alt', $cid, $type);
 
-    if (user_access('use up-down vote') && ($user->uid || variable_get('vote_up_down_anonymous_vote', 0))) {
+    if (user_access('use vote up/down') && ($user->uid || variable_get('vote_up_down_anonymous_vote', 0))) {
       $user_vote = votingapi_get_user_votes($type, $cid, _vote_up_down_get_uid());
 
       if ($user_vote[0]->value > 0) {

@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ * The .install file, that contains the schema for the vote_up_down.module
+ */
+
+/**
  * Implementation of hook_uninstall().
  */
 function vote_up_down_uninstall() {

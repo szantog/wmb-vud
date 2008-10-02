@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * template.php for the vote_up_down.module
+ */
+
 /* TODO FormAPI image buttons are now supported.
    FormAPI now offers the 'image_button' element type, allowing developers to
    use icons or other custom images in place of traditional HTML submit buttons.
@@ -47,7 +52,7 @@ function template_theme() {
 } */
 
 function _phptemplate_variables($hook, $vars) {
-  switch($hook) {
+  switch ($hook) {
     case 'node':
       $vars['storylink_url'] = check_url($vars['node']->vote_storylink_url);
       if (arg(1) != 'add' && arg(2) != 'edit') {
@@ -66,4 +71,3 @@ function _phptemplate_variables($hook, $vars) {
   }
   return $vars;
 }
-?>

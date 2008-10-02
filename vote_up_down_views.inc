@@ -1,6 +1,11 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Will provide integration with the views.module
+ */
+
 /* TODO FormAPI image buttons are now supported.
    FormAPI now offers the 'image_button' element type, allowing developers to
    use icons or other custom images in place of traditional HTML submit buttons.
@@ -49,5 +54,3 @@ function vote_up_down_views_theme() {
 function vote_up_down_views_default_views() {
 
 }
-
-?>
