@@ -172,7 +172,7 @@ function vote_up_down_menu() {
     'access arguments' => array('access vote up/down statistics'),
   );
 
-  /*  if (arg(0) == 'node' && is_numeric(arg(1))) {
+  if (arg(0) == 'node' && is_numeric(arg(1))) {
     $node = node_load(arg(1));
     $vote_access = (user_access('access vote up/down statistics') && in_array($node->type, variable_get('vote_up_down_node_types', array()), TRUE));
     $items['node/'.'%'.'/votesupdown'] = array(
@@ -194,10 +194,7 @@ function vote_up_down_menu() {
       'type' => MENU_LOCAL_TASK
     );
   }
-  */
-
   
-
   drupal_add_css(drupal_get_path('module', 'vote_up_down') .'/vote_up_down.css');
   drupal_add_js(drupal_get_path('module', 'vote_up_down') .'/ajax_vote_up_down.js');
 
