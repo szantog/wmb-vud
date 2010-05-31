@@ -21,7 +21,7 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: vote_up_down.module:25
-msgid "<p>This module is used to add a up/down vote widget to selected node types, part of Vote up/down.</p>"
+msgid "<p>This module is used to add a up/down voting widget to selected node types. (Part of Vote up/down package)</p>"
 msgstr ""
 
 #: vote_up_down.module:43
@@ -41,7 +41,7 @@ msgid "Vote widget settings for nodes"
 msgstr ""
 
 #: vote_up_down.module:57
-msgid "For more control over the voting widget placement it can be inserted directly in the theme, see the included template.php and node-storylink.tpl.php for an example. When this method is used turn off the widget display here."
+msgid "For more control over the voting widget placement, it can be inserted directly in the theme. See the included template.php and node-storylink.tpl.php for an example. When this method is used, turn off the widget display here."
 msgstr ""
 
 #: vote_up_down.module:63;92
@@ -57,7 +57,7 @@ msgid "Alternative +1 vote style"
 msgstr ""
 
 #: vote_up_down.module:66;95
-msgid "If set to alternative style it's recomended to turn off the link display of vote points."
+msgid "If set to alternative style, it's recomended to turn off the link display of vote points."
 msgstr ""
 
 #: vote_up_down.module:70;99
@@ -81,7 +81,7 @@ msgid "Teasers and full-page view"
 msgstr ""
 
 #: vote_up_down.module:73
-msgid "When to display the vote widget for nodes."
+msgid "When to display the vote widget for nodes?"
 msgstr ""
 
 #: vote_up_down.module:77;105
@@ -89,7 +89,7 @@ msgid "Link display of vote points"
 msgstr ""
 
 #: vote_up_down.module:80
-msgid "When to display vote points for nodes."
+msgid "When to display vote points for nodes?"
 msgstr ""
 
 #: vote_up_down.module:85
@@ -97,7 +97,7 @@ msgid "Vote widget settings for comments"
 msgstr ""
 
 #: vote_up_down.module:86
-msgid "For more control over the voting widget placement it can be inserted directly in the theme, see the included node-storylink.tpl.php for an example. When this metod is used turn off the widget display here."
+msgid "For more control over the voting widget placement, it can be inserted directly in the theme. See the included node-storylink.tpl.php for an example. When this method is used, turn off the widget display here."
 msgstr ""
 
 #: vote_up_down.module:101
@@ -141,7 +141,7 @@ msgid "Yes"
 msgstr ""
 
 #: vote_up_down.module:127
-msgid "If yes anonymous users may cast votes, restricted to one vote per day and IP address."
+msgid "If yes, anonymous users may cast votes, restricted to one vote per day and IP address."
 msgstr ""
 
 #: vote_up_down.module:131
@@ -149,7 +149,7 @@ msgid "Allow users to reset their votes"
 msgstr ""
 
 #: vote_up_down.module:134
-msgid "If yes a link will be displayd on nodes and commets that will reset the users votes on that node/comment."
+msgid "If yes, a link will be displayd on nodes and commets that will reset the users votes on that node/comment."
 msgstr ""
 
 #: vote_up_down.module:149;167 vote_up_down.info:0
@@ -259,7 +259,7 @@ msgid "vote_up_down"
 msgstr ""
 
 #: vote_storylink.info:0
-msgid "Enables the creation of articles that links to websites, pages, documents etc., part of Vote up/down."
+msgid "Enables the creation of articles that links to websites, pages, documents etc. (Part of Vote Up/Down Package)"
 msgstr ""
 
 #: vote_storylink.info:0 vote_up_down.info:0
@@ -267,6 +267,6 @@ msgid "Voting"
 msgstr ""
 
 #: vote_up_down.info:0
-msgid "Adds a up/down vote widget to selected node types, part of Vote up/down."
+msgid "Adds a up/down vote widget to selected node types. (Part of Vote Up/Down package)"
 msgstr ""
 

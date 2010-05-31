@@ -1,7 +1,0 @@
-; $Id$
-name = Storylink
-description = Enables the creation of articles that links to websites, pages, documents etc., part of Vote up/down.
-dependencies[] = links
-package = Voting
-
-core = 6.x
