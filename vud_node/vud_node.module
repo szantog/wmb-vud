@@ -294,3 +294,18 @@ function vud_node_link($type, $object, $teaser = FALSE) {
   }
   return $links;
 }
+
+/**
+ * Implementation of hook_content_extra_fields().
+ */
+function vud_node_content_extra_fields($type_name) {
+  if (in_array($type_name, variable_get('vud_node_types', array()), TRUE)) {
+    $extra = array();
+    $extra['vud_node_widget_display'] = array(
+      'label' => t('Vote Up/Down on nodes'),
+      'description' => t('Vote Up/Down module widget.'),
+      'weight' => -10,
+    );
+    return $extra;
+  }
+}
