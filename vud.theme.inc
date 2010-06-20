@@ -165,7 +165,9 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
     'tag' => $tag,
     'function' => 'sum'
   );
-  $vote_result = (int) votingapi_select_single_result_value($result_criteria);
+  $raw_points = votingapi_select_single_result_value($result_criteria);
+  $variables['raw_points'] = $raw_points;
+  $vote_result = (int)$raw_points;
   $variables['unsigned_points'] = $vote_result;
 
   if ($vote_result > 0) {
