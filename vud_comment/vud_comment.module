@@ -177,7 +177,7 @@ function vud_comment_link($type, $object, $teaser = FALSE) {
           'html' => TRUE,
         );
       }
-      if (variable_get('vud_comment_reset', 0)) {
+      if (variable_get('vud_comment_reset', 0) && user_access('reset vote up/down votes')) {
         $reset_token = drupal_get_token("votereset/comment/$comment->cid/$tag");
         $links['vud_comment_votes_reset_link'] = array(
           'title' => t('Reset your vote'),

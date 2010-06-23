@@ -108,7 +108,7 @@ function _vud_term_generate_table(&$node) {
     $content_id =  $tdetails->tid;
     $tag = "n$node->nid";
     $reset_token = drupal_get_token("votereset/term/$content_id/$tag");
-    if (variable_get('vud_term_reset', 0)) {
+    if (variable_get('vud_term_reset', 0) && user_access('reset vote up/down votes')) {
       $header = array(
         array('data' => t('Term')),
         array('data' => t('Description')),
