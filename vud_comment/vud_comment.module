@@ -178,12 +178,22 @@ function vud_comment_link($type, $object, $teaser = FALSE) {
         );
       }
       if (variable_get('vud_comment_reset', 0) && user_access('reset vote up/down votes')) {
-        $reset_token = drupal_get_token("votereset/comment/$comment->cid/$tag");
-        $links['vud_comment_votes_reset_link'] = array(
-          'title' => t('Reset your vote'),
-          'href'  => "votereset/comment/$comment->cid/$tag/$reset_token",
-          'html'  => TRUE,
+        $tag = variable_get('vote_up_down_tag', 'vote');
+        $criteria = array(
+          'content_type' => $type,
+          'content_id' => $comment->cid,
+          'tag' => $tag,
         );
+        $criteria += votingapi_current_user_identifier();
+        $user_vote = votingapi_select_single_vote_value($criteria);
+        if (!is_null($user_vote)) {
+          $reset_token = drupal_get_token("votereset/comment/$comment->cid/$tag");
+          $links['vud_comment_votes_reset_link'] = array(
+            'title' => t('Reset your vote'),
+            'href'  => "votereset/comment/$comment->cid/$tag/$reset_token",
+            'html'  => TRUE,
+          );
+        }
       }
       break;
   }
