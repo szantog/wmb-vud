@@ -48,6 +48,16 @@ function vud_node_menu() {
 }
 
 /**
+ * Implementation of hook_views_api().
+ */
+function vud_node_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'vud_node') . '/views',
+  );
+}
+
+/**
  * Access Callback from hook_menu (vud_node_menu).
  */
 function vud_node_tab_view_stats($node) {

@@ -193,3 +193,12 @@ function vud_comment_template_suggestions($template_type, $plugin, $content_id) 
   );
 }
 
+/**
+ * Implementation of hook_views_api().
+ */
+function vud_comment_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'vud_comment') . '/views',
+  );
+}
