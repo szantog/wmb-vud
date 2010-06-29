@@ -146,29 +146,6 @@ function _vud_term_generate_table(&$node) {
 }
 
 /**
- * Implementation of hook_theme().
- */
-function vud_term_theme() {
-  return array(
-    'vud_widget' => array(
-      'arguments' => array('content_id'  => NULL, 'type' => NULL, 'tag'  => NULL, 'widget_theme' => NULL),
-      'function'  => 'vud_widget_proxy',
-    ),
-  );
-  $arguments = array('content_id' => NULL, 'type' => NULL, 'tag' => NULL, 'widget_theme' => NULL);
-  return array(
-    'vud_widget_term' => array(
-      'function'  => 'vud_widget_proxy',
-      'arguments' => $arguments,
-    ),
-    'vud_widget_term_vid' => array(
-      'pattern' => 'vud_widget_term__',
-      'arguments' => $arguments,
-    ),
-  );
-}
-
-/**
  * Function to get votes for a particular term row on a node.
  */
 function _vud_term_get_row_votes($content_id, $tag) {
@@ -181,4 +158,17 @@ function _vud_term_get_row_votes($content_id, $tag) {
   );
   $vote_result = (int) votingapi_select_single_result_value($criteria);
   return $vote_result;
+}
+
+/**
+ * Implementation of vud hook_template_suggestions().
+ */
+function vud_term_template_suggestions($template_type, $plugin, $content_id) {
+  $term = taxonomy_get_term($content_id);
+  return array(
+    $template_type,
+    $template_type. '_term',
+    $template_type. '_term_' . $plugin['name'],
+    $template_type. '_term_' . $plugin['name'] . '__' . $term->vid,
+  );
 }

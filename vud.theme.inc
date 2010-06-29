@@ -68,39 +68,50 @@ function vud_widget_get_names() {
 }
 
 /**
- * Build a list of theme function names.
- */
-function vud_theme_functions($hook, $type, $content_id) {
-  switch ($type) {
-    case 'node':
-      $node = node_load($content_id);
-      $themes[] = $hook . '_' . $type . '__' . $node->type;
-      break;
-    case 'comment':
-      $comment = _comment_load($content_id);
-      $node = node_load($comment->nid);
-      $themes[] = $hook . '_' . $type . '__' . $node->type;
-      break;
-    case 'term':
-      $term = taxonomy_get_term($content_id);
-      $themes[] = $hook . '_' . $type . '__' . $term->vid;
-      break;
-  }
-  $themes[] = $hook . '_' . $type;
-  $themes[] = $hook;
-  return $themes;
-}
-
-/**
  * Implementation of hook_theme().
  */
 function vud_theme() {
   return array(
     'vud_widget' => array(
       'function'  => 'vud_widget_proxy',
+      'arguments' => array('content_id' => NULL, 'type' => NULL, 'tag' => NULL, 'widget_theme' => NULL, 'readonly' => NULL, 'widget_message_code' => NULL),
+    ),
+    'vud_votes' => array(
+      'function'  => 'vud_votes_proxy',
       'arguments' => array('content_id' => NULL, 'type' => NULL, 'tag' => NULL, 'widget_theme' => NULL),
     ),
   );
+}
+
+/**
+ * Mimic some theming workflow.
+ *
+ * We do this since we do not have standard theme overwrite because
+ * is not possible to decide dinamically the path where the template is
+ * located(in contrast with function names and template names).
+ */
+function vud_pseudo_theming($vote_entity, $template_type, $plugin, &$variables) {
+  // let modules modify variables passed to the template
+  $variables_type = 'vud_' . $template_type . '_template_variables';
+  drupal_alter($variables_type, $variables);
+
+  // and then provide template suggestions by hand
+  $suggestions = module_invoke('vud_' . $vote_entity, 'template_suggestions', $template_type, $plugin, $variables['content_id']);
+  if (empty($suggestions)) {
+    $template_file = $plugin['path'] . '/' . $plugin[$template_type . ' template'] . $plugin['extension'];
+  }
+  else {
+    global $theme_key;
+    $themes = list_themes();
+    $current_theme = $themes[$theme_key];
+    $paths = array(
+      $plugin['path'],
+      dirname($current_theme->filename),
+    );
+    $template_file = drupal_discover_template($paths, $suggestions, $plugin['extension']);
+  }
+
+  return $template_file;
 }
 
 /**
@@ -112,7 +123,6 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
     return;
   }
 
-  $template_file = $plugin['path'] . '/' . $plugin['widget template'] . $plugin['extension'];
   $variables = array(
     'content_id' => $content_id,
     'type' => $type,
@@ -215,8 +225,9 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
   $variables['link_up'] = $link_up;
   $variables['link_down'] = $link_down;
 
-  $output = $plugin['render function']($template_file, $variables);
-  return $output;
+  $template_file = vud_pseudo_theming($type, 'widget', $plugin, &$variables);
+
+  return $plugin['render function']($template_file, $variables);
 }
 
 /**
@@ -268,9 +279,14 @@ function vud_votes_proxy($content_id, $type, $tag, $widget_theme) {
   vud_add_files('css', $plugin);  // Search and add the CSS files.
   vud_add_files('js', $plugin);   // Search and add the JS files.
 
-  if (file_exists($template_file)) {
+  $template_file = vud_pseudo_theming($type, 'votes', $plugin, &$variables);
+
+  // not all widget use votes.tpl.php
+  if (function_exists($plugin['render function'])) {
     return $plugin['render function']($template_file, $variables);
   }
+
+  return '';
 }
 
 /**
@@ -340,11 +356,11 @@ function vud_vote($type, $content_id, $value, $tag, $widget, $token) {
     else {
       $commands = array();
       if (!empty($plugin['widget template'])) {
-        $commands[] = ctools_ajax_command_replace("#widget-$type-$content_id", theme(vud_theme_functions('vud_widget', $type, $content_id), $content_id, $type, $tag, $widget));
+        $commands[] = ctools_ajax_command_replace("#widget-$type-$content_id", theme('vud_widget', $content_id, $type, $tag, $widget));
       }
 
       if (!empty($plugin['votes template'])) {
-        $commands[] = ctools_ajax_command_replace("#votes-$type-$content_id", theme(vud_theme_functions('vud_votes', $type, $content_id), $content_id, $type, $tag, $widget));
+        $commands[] = ctools_ajax_command_replace("#votes-$type-$content_id", theme('vud_votes', $content_id, $type, $tag, $widget));
       }
     }
 

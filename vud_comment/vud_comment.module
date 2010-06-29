@@ -140,27 +140,6 @@ function _vud_comment_get_node_type($nid) {
 }
 
 /**
- * Implementation of hook_theme().
- */
-function vud_comment_theme() {
-  $arguments = array('content_id' => NULL, 'type' => NULL, 'tag' => NULL, 'widget_theme' => NULL);
-  return array(
-    'vud_widget_comment' => array(
-      'function'  => 'vud_widget_proxy',
-      'arguments' => $arguments,
-    ),
-    'vud_widget_comment_nodetype' => array(
-      'pattern' => 'vud_widget_comment__',
-      'arguments' => $arguments,
-    ),
-    'vud_votes' => array(
-      'function'  => 'vud_votes_proxy',
-      'arguments' => $arguments,
-    ),
-  );
-}
-
-/**
  * Implementation of hook_link().
  */
 function vud_comment_link($type, $object, $teaser = FALSE) {
@@ -199,3 +178,18 @@ function vud_comment_link($type, $object, $teaser = FALSE) {
   }
   return $links;
 }
+
+/**
+ * Implementation of vud hook_template_suggestions().
+ */
+function vud_comment_template_suggestions($template_type, $plugin, $content_id) {
+  $comment = _comment_load($content_id);
+  $node = node_load($comment->nid);
+  return array(
+    $template_type,
+    $template_type. '_comment',
+    $template_type. '_comment_' . $plugin['name'],
+    $template_type. '_comment_' . $plugin['name'] . '__' . $node->type,
+  );
+}
+

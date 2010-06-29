@@ -113,8 +113,49 @@ Vote Up/Down, so you can
 == Customization ==
 
 You can write your own widget for Vote Up/Down, and you can put it in
-your module or in your theme. Please take a look to WIDGETAPI.txt for more
-information.
+your module or in your theme. Please take a look to
+link:WIDGETAPI.html[WIDGETAPI.txt] for more information.
+
+=== Theming widgets and votes ===
+
+Since widgets are implemented through plugins, and we have many plugins
+to choose at runtime, we can not use direct theme templates, so instead
+we render by hands the templates.
+
+NOTE: It is not possible to decide dinamically the path where the
+template is located. In contrast we can dinamically define function and
+template names.
+
+So, before rendering the template('widget.tpl.php' or 'votes.tpl.php') we
+verify in the following order the files:
+
+* For 'vud_comment'
++
+----
+<template_type>_comment_<plugin_name>__<node_type>
+<template_type>_comment_<plugin_name>
+<template_type>_comment
+----
+* For 'vud_node'
++
+----
+<template_type>_comment_<plugin_name>__<node_type>
+<template_type>_comment_<plugin_name>
+<template_type>_comment
+----
+* For 'vud_term'
++
+----
+<template_type>_comment_<plugin_name>__<term_vid>
+<template_type>_comment_<plugin_name>
+<template_type>_comment
+----
+
+Where '<template_type>' is 'widget' or 'votes'.
+
+This templates can be located on the root of your theme folder or inside
+your widget folder(not really recommended).
+
 
 == Credits ==
 

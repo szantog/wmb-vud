@@ -110,7 +110,7 @@ return system_settings_form($form);
 }
 
 /**
- * Implementation of hook_vud_widget_message_codes_alter().
+ * Implementation of vud hook_vud_widget_message_codes_alter().
  */
 function vud_node_vud_widget_message_codes_alter(&$widget_message_codes) {
   $widget_message_codes[VUD_NODE_WIDGET_MESSAGE_TEASER_DENIED] = t('Please go to full version of this content to vote.');
@@ -154,7 +154,7 @@ function vud_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
             case VUD_NODE_DISPLAY_TEASER_ONLY:
               if ($teaser == 1) {
                 $node->content['vud_node_widget_display'] = array(
-                  '#value' => theme(vud_theme_functions('vud_widget', 'node', $node->nid), $node->nid, 'node', $tag, $widget, !$vote_on_teaser || !$can_edit, $widget_message_code),
+                  '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, !$vote_on_teaser || !$can_edit, $widget_message_code),
                   '#weight' => -10,
                 );
               }
@@ -162,7 +162,7 @@ function vud_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
             case VUD_NODE_DISPLAY_FULL_ONLY:
               if ($teaser == 0) {
                 $node->content['vud_node_widget_display'] = array(
-                  '#value' => theme(vud_theme_functions('vud_widget', 'node', $node->nid), $node->nid, 'node', $tag, $widget, !$can_edit, $widget_message_code),
+                  '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, !$can_edit, $widget_message_code),
                   '#weight' => -10,
                 );
               }
@@ -175,7 +175,7 @@ function vud_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
                 $readonly = !$can_edit;
               }
               $node->content['vud_node_widget_display'] = array(
-                '#value' => theme(vud_theme_functions('vud_widget', 'node', $node->nid), $node->nid, 'node', $tag, $widget, $readonly, $widget_message_code),
+                '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, $readonly, $widget_message_code),
                 '#weight' => -10,
               );
               break;
@@ -188,23 +188,15 @@ function vud_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 }
 
 /**
- * Implementation of hook_theme().
+ * Implementation of vud hook_template_suggestions().
  */
-function vud_node_theme() {
-  $arguments = array('content_id' => NULL, 'type' => NULL, 'tag' => NULL, 'widget_theme' => NULL);
+function vud_node_template_suggestions($template_type, $plugin, $content_id) {
+  $node = node_load($content_id);
   return array(
-    'vud_widget_node' => array(
-      'function'  => 'vud_widget_proxy',
-      'arguments' => $arguments,
-    ),
-    'vud_widget_node_nodetype' => array(
-      'pattern' => 'vud_widget_node__',
-      'arguments' => $arguments,
-    ),
-    'vud_votes' => array(
-      'function'  => 'vud_votes_proxy',
-      'arguments' => $arguments,
-    ),
+    $template_type,
+    $template_type. '_node',
+    $template_type. '_node_' . $plugin['name'],
+    $template_type. '_node_' . $plugin['name'] . '__' . $node->type,
   );
 }
 
@@ -260,7 +252,7 @@ function vud_node_link($type, $object, $teaser = FALSE) {
         case VUD_NODE_DISPLAY_TEASER_ONLY:
           if (($teaser == 1) && $node_type && $view_vud_node_votes_count) {
             $links['vud_node_votes_count'] = array(
-              'title' => theme(vud_theme_functions('vud_votes', 'node', $node->nid), $node->nid, $type, $tag, $widget_theme),
+              'title' => theme('vud_votes', $node->nid, $type, $tag, $widget_theme),
               'html'  => TRUE,
             );
           }
@@ -268,7 +260,7 @@ function vud_node_link($type, $object, $teaser = FALSE) {
         case VUD_NODE_DISPLAY_FULL_ONLY:
           if (($teaser == 0) && $node_type && $view_vud_node_votes_count) {
             $links['vud_node_votes_count'] = array(
-              'title' => theme(vud_theme_functions('vud_votes', 'node', $node->nid), $node->nid, $type, $tag, $widget_theme),
+              'title' => theme('vud_votes', $node->nid, $type, $tag, $widget_theme),
               'html'  => TRUE,
             );
           }
@@ -276,7 +268,7 @@ function vud_node_link($type, $object, $teaser = FALSE) {
         case VUD_NODE_DISPLAY_BOTH:
           if ($node_type && $view_vud_node_votes_count) {
             $links['vud_node_votes_count'] = array(
-              'title' => theme(vud_theme_functions('vud_votes', 'node', $node->nid), $node->nid, $type, $tag, $widget_theme),
+              'title' => theme('vud_votes', $node->nid, $type, $tag, $widget_theme),
               'html'  => TRUE,
             );
           }
