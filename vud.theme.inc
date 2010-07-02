@@ -225,7 +225,7 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
   $variables['link_up'] = $link_up;
   $variables['link_down'] = $link_down;
 
-  $template_file = vud_pseudo_theming($type, 'widget', $plugin, &$variables);
+  $template_file = vud_pseudo_theming($type, 'widget', $plugin, $variables);
 
   return $plugin['render function']($template_file, $variables);
 }
@@ -279,7 +279,7 @@ function vud_votes_proxy($content_id, $type, $tag, $widget_theme) {
   vud_add_files('css', $plugin);  // Search and add the CSS files.
   vud_add_files('js', $plugin);   // Search and add the JS files.
 
-  $template_file = vud_pseudo_theming($type, 'votes', $plugin, &$variables);
+  $template_file = vud_pseudo_theming($type, 'votes', $plugin, $variables);
 
   // not all widget use votes.tpl.php
   if (function_exists($plugin['render function'])) {
