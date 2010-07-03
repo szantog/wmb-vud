@@ -298,6 +298,7 @@ function vud_node_link($type, $object, $teaser = FALSE) {
           $links['vud_node_votes_reset_link'] = array(
             'title' => t('Reset your vote'),
             'href'  => "votereset/node/$node->nid/$tag/$reset_token",
+            'attributes' => array('rel' => 'nofollow'),
             'html'  => TRUE,
           );
         }

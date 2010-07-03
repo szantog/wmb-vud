@@ -170,6 +170,7 @@ function vud_comment_link($type, $object, $teaser = FALSE) {
           $links['vud_comment_votes_reset_link'] = array(
             'title' => t('Reset your vote'),
             'href'  => "votereset/comment/$comment->cid/$tag/$reset_token",
+            'attributes' => array('rel' => 'nofollow'),
             'html'  => TRUE,
           );
         }
