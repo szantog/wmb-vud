@@ -178,7 +178,37 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
   $raw_points = votingapi_select_single_result_value($result_criteria);
   $variables['raw_points'] = $raw_points;
   $vote_result = (int)$raw_points;
+
+  $criteria = array(
+    'content_type' => $type,
+    'content_id' => $content_id,
+    'value_type' => 'points',
+    'tag' => $tag,
+    'function' => 'count'
+  );
+  $vote_count = (int)votingapi_select_single_result_value($criteria);
+  $variables['vote_count'] = $vote_count;
+
   $variables['unsigned_points'] = $vote_result;
+
+  $criteria = array(
+    'content_type' => $type,
+    'content_id' => $content_id,
+    'value_type' => 'points',
+    'tag' => $tag,
+    'function' => 'positives'
+  );
+  $positives = (int)votingapi_select_single_result_value($criteria);
+  $variables['up_points'] = $positives;
+  $criteria = array(
+    'content_type' => $type,
+    'content_id' => $content_id,
+    'value_type' => 'points',
+    'tag' => $tag,
+    'function' => 'negatives'
+  );
+  $negatives = (int)votingapi_select_single_result_value($criteria);
+  $variables['down_points'] = $negatives;
 
   if ($vote_result > 0) {
     $variables['class'] = 'positive';

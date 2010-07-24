@@ -154,15 +154,18 @@ specify__ them.
 'up' link. Needed for javascript.
 `$link_class_down` :: String with the classes that should be put onto the
 "down" link. Needed for javascript.
-`$class`	       :: 'negative', 'positive' or 'neutral' depending on
+`$class`	         :: 'negative', 'positive' or 'neutral' depending on
 number of votes.
 `$vote_label`      :: The pluralized vote label.
-`$raw_points`	   :: Raw value for total vote points for the vote object
+`$raw_points`	     :: Raw value for total vote points for the vote object
     (It can be a NULL if there are no votes or a signed value).
-`$points`	       :: Number of total vote points for the vote object
+`$points`	         :: Number of total vote points for the vote object
     (signed).
 `$unsigned_points` :: Number of total vote points for the object
     (unsigned).
+`$up_points`	     :: Number of total positive vote points for the vote object.
+`$down_points`	   :: Number of total positive vote points for the vote object.
+`$vote_count`	     :: Number of total votes for the vote object.
 `$readonly`        :: Boolean that indicates if the actual user can vote
     on the object where the widget is displayed.
 `$show_links`      :: Boolean that indicates if the links need to be

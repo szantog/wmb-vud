@@ -193,3 +193,61 @@ function vud_ctools_plugin_directory($module, $plugin) {
     return $plugin;
   }
 }
+
+/**
+ * Implementation of votingapi hook_votingapi_results_alter().
+ */
+function vud_votingapi_results_alter(&$cache, $content_type, $content_id) {
+  $vud_cache = _vud_get_standard_results($content_type, $content_id);
+  $cache = array_merge_recursive($cache, $vud_cache);
+}
+
+/**
+ * Implementation of hook_votingapi_metadata_alter().
+ */
+function vud_votingapi_metadata_alter(&$data) {
+  $data['functions']['positives'] = array(
+    'name' => t('Positives'),
+    'description' => t('The sum of all positive votes for a content.'),
+    'module' => 'vud',
+  );
+  $data['functions']['negatives'] = array(
+    'name' => t('Negatives'),
+    'description' => t('The sum of all negative votes for a content.'),
+    'module' => 'vud',
+  );
+}
+
+/**
+ * Calculate positive/negative results for VotingAPI cache.
+ *
+ * We provide 0 if not votes found.
+ */
+function _vud_get_standard_results($content_type, $content_id) {
+  $cache = array();
+  $tag = variable_get('vud_tag', 'vote');
+
+  $sql  = "SELECT SUM(v.value) as value_positives ";
+  $sql .= "FROM {votingapi_vote} v ";
+  $sql .= "WHERE v.content_type = '%s' AND v.content_id = %d AND v.value_type = 'points' AND v.value > 0 ";
+  $sql .= "GROUP BY v.value_type, v.tag";
+  $value_positives = db_result(db_query($sql, $content_type, $content_id));
+
+  if ($value_positives === FALSE) {
+    $value_positives = 0;
+  }
+  $cache[$tag]['points']['positives'] = $value_positives;
+
+  $sql  = "SELECT SUM(v.value) as value_negatives ";
+  $sql .= "FROM {votingapi_vote} v ";
+  $sql .= "WHERE v.content_type = '%s' AND v.content_id = %d AND v.value_type = 'points' AND v.value < 0 ";
+  $sql .= "GROUP BY v.value_type, v.tag";
+  $value_negatives = db_result(db_query($sql, $content_type, $content_id));
+
+  if ($value_negatives === FALSE) {
+    $value_negatives = 0;
+  }
+  $cache[$tag]['points']['negatives'] = $value_negatives;
+
+  return $cache;
+}
