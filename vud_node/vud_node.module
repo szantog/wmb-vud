@@ -86,7 +86,7 @@ function vud_node_admin_settings() {
     '#title'         => t('Widget selection'),
     '#description'   => t('Select the voting widget theme that will be displayed.'),
     '#type'          => 'radios',
-    '#default_value' => variable_get('vud_node_widget', 'plain'),
+    '#default_value' => variable_get('vud_node_widget', 'updown'),
     '#options'       => vud_widget_get_names(),
   );
   $form['vud_node_widget_show'] = array(
