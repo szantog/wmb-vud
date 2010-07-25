@@ -9,6 +9,17 @@
 module_load_include('inc', 'vud', 'vud.theme');  // Include the theme.inc file.
 
 /**
+ * Implementation of hook_init().
+ */
+function vud_init() {
+  // Expire anonymous sessions early for Pressflow (30 minutes)
+  $now = time();
+  if (!empty($_SESSION['vud_timestamp']) && $now - $_SESSION['vud_timestamp'] > 60 * 30) {
+    unset($_SESSION['vud_timestamp']);
+  }
+}
+
+/**
  * Implementation of hook_help().
  */
 function vud_help($path, $arg) {
