@@ -377,7 +377,9 @@ function vud_vote($type, $content_id, $value, $tag, $widget, $token) {
     votingapi_set_votes($votes);
   }
   else {
-    watchdog("vud", "Could not vote on $type $content_id, with value $value, tag $tag and token $token");
+    watchdog('vud',
+      'Could not vote on @type @content_id, with value @value, tag @tag and token @token',
+      array('@type' => $type, '@content_id' => $content_id, '@value' => $value, '@tag' => $tag, '@token' => $token));
     drupal_set_message(t("Oops! There was an error in submitting your vote!"), 'warning');
   }
 
