@@ -4,18 +4,18 @@
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
 #  hook_vud.php,v 1.1.2.2 2010/06/20 20:44:17 marvil07
-#  vud.theme.inc,v 1.1.2.37 2010/07/25 02:59:34 marvil07
-#  vud.module,v 1.1.2.31 2010/07/25 02:59:34 marvil07
+#  vud.theme.inc,v 1.1.2.38 2010/08/02 05:13:22 marvil07
+#  vud.module,v 1.1.2.33 2010/08/02 05:14:51 marvil07
 #  vud.info,v 1.1.2.2 2010/03/12 08:06:45 marvil07
-#  vud_node.module,v 1.1.2.42 2010/07/25 02:55:12 marvil07
-#  vud_term.module,v 1.1.2.16 2010/06/29 05:35:39 marvil07
-#  vud_comment.views.inc,v 1.1.2.1 2010/06/29 05:35:38 marvil07
-#  vud_node.views.inc,v 1.1.2.1 2010/06/29 05:35:39 marvil07
-#  vud_term.views.inc,v 1.1.2.1 2010/06/29 05:35:39 marvil07
+#  vud_node.module,v 1.1.2.43 2010/08/02 05:14:51 marvil07
+#  vud_term.module,v 1.1.2.17 2010/08/02 05:14:51 marvil07
+#  vud_comment.views.inc,v 1.1.2.2 2010/08/02 05:14:51 marvil07
+#  vud_node.views.inc,v 1.1.2.2 2010/08/02 05:14:51 marvil07
+#  vud_term.views.inc,v 1.1.2.2 2010/08/02 05:14:51 marvil07
 #  vud_comment.info,v 1.1.2.2 2009/08/15 21:15:45 lut4rp
 #  vud_node.info,v 1.1.2.3 2009/08/15 12:21:32 lut4rp
 #  vud_term.info,v 1.1.2.3 2009/08/15 21:15:46 lut4rp
-#  vud_comment.module,v 1.1.2.26 2010/07/03 22:08:30 marvil07
+#  vud_comment.module,v 1.1.2.27 2010/08/02 05:14:51 marvil07
 #  widget.tpl.php,v 1.1.2.16 2010/07/03 22:08:30 marvil07
 #  widget.tpl.php,v 1.1.2.15 2010/07/03 22:08:30 marvil07
 #  widget.tpl.php,v 1.1.2.1 2010/07/24 23:23:54 marvil07
@@ -29,7 +29,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2010-07-24 22:33-0500\n"
+"POT-Creation-Date: 2010-08-02 02:43-0500\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -42,8 +42,16 @@ msgstr ""
 msgid "The voting on this is postponed, please wait a while. we will be open the voting soon"
 msgstr ""
 
-#: vud.theme.inc:381
+#: vud.theme.inc:383
 msgid "Oops! There was an error in submitting your vote!"
+msgstr ""
+
+#: vud.theme.inc:380 vud.module:174
+msgid "vud"
+msgstr ""
+
+#: vud.theme.inc:380
+msgid "Could not vote on @type @content_id, with value @value, tag @tag and token @token"
 msgstr ""
 
 #: vud.theme.inc:231;312
@@ -72,10 +80,6 @@ msgstr ""
 msgid "When this flag is active, a modal window will be shown to the end user instead of avoid showing the voting links"
 msgstr ""
 
-#: vud.module:92
-msgid "Votes"
-msgstr ""
-
 #: vud.module:124
 msgid "Node"
 msgstr ""
@@ -92,32 +96,36 @@ msgstr ""
 msgid "!time ago"
 msgstr ""
 
-#: vud.module:175
+#: vud.module:177
 msgid "Oops! There was an error in resetting your vote!"
 msgstr ""
 
-#: vud.module:184
+#: vud.module:186
 msgid "Sorry, there was problem on the vote."
 msgstr ""
 
-#: vud.module:185
+#: vud.module:187
 msgid "You are not allowed to vote."
 msgstr ""
 
-#: vud.module:221
+#: vud.module:223
 msgid "Positives"
 msgstr ""
 
-#: vud.module:222
+#: vud.module:224
 msgid "The sum of all positive votes for a content."
 msgstr ""
 
-#: vud.module:226
+#: vud.module:228
 msgid "Negatives"
 msgstr ""
 
-#: vud.module:227
+#: vud.module:229
 msgid "The sum of all negative votes for a content."
+msgstr ""
+
+#: vud.module:174
+msgid "Could not reset votes on @type @content_id, with value @value, tag @tag and token @token"
 msgstr ""
 
 #: vud.module:114
@@ -136,7 +144,7 @@ msgstr ""
 msgid "reset vote up/down votes"
 msgstr ""
 
-#: vud.module:60 vud.info:0 vud_comment/views/vud_comment.views.inc:9 vud_node/views/vud_node.views.inc:9 vud_term/views/vud_term.views.inc:9
+#: vud.module:60 vud.info:0 vud_comment/views/vud_comment.views.inc:14 vud_node/views/vud_node.views.inc:14 vud_term/views/vud_term.views.inc:15
 msgid "Vote Up/Down"
 msgstr ""
 
@@ -150,6 +158,10 @@ msgstr ""
 
 #: vud.module:84
 msgid "Reset vote"
+msgstr ""
+
+#: vud.module:92
+msgid "Votes"
 msgstr ""
 
 #: vud.module:100
@@ -240,11 +252,11 @@ msgstr ""
 msgid "Allows adding an up/down voting widget to comments."
 msgstr ""
 
-#: vud_comment/views/vud_comment.views.inc:10
+#: vud_comment/views/vud_comment.views.inc:15
 msgid "Comment Widget"
 msgstr ""
 
-#: vud_comment/views/vud_comment.views.inc:11
+#: vud_comment/views/vud_comment.views.inc:16
 msgid "Provide a comment widget for the Vote up/Down module."
 msgstr ""
 
@@ -328,11 +340,11 @@ msgstr ""
 msgid "Allows adding an up/down voting widget to selected content types."
 msgstr ""
 
-#: vud_node/views/vud_node.views.inc:10
+#: vud_node/views/vud_node.views.inc:15
 msgid "Node Widget"
 msgstr ""
 
-#: vud_node/views/vud_node.views.inc:11
+#: vud_node/views/vud_node.views.inc:16
 msgid "Provide a node widget for the Vote up/Down module."
 msgstr ""
 
@@ -392,11 +404,11 @@ msgstr ""
 msgid "Allows adding an up/down voting widget to taxonomy terms on a node."
 msgstr ""
 
-#: vud_term/views/vud_term.views.inc:10
+#: vud_term/views/vud_term.views.inc:16
 msgid "Term Widget"
 msgstr ""
 
-#: vud_term/views/vud_term.views.inc:11
+#: vud_term/views/vud_term.views.inc:17
 msgid "Provide a term widget for the Vote up/Down module."
 msgstr ""
 
