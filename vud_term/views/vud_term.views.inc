@@ -2,6 +2,12 @@
 // $Id$
 
 /**
+ * @file
+ * Provide views data and handlers for vud_term.module
+ */
+
+
+/**
  * Implementation of hook_views_data_alter().
  */
 function vud_term_views_data_alter(&$data) {

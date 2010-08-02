@@ -89,7 +89,7 @@ function vud_menu() {
   );
 
   $items['user/%user/votes'] = array(
-    'title'            => t('Votes'),
+    'title'            => 'Votes',
     'page callback'    => 'vud_user_votes',
     'page arguments'   => array(1),
     'access arguments' => array('access vote up/down statistics'),

@@ -204,9 +204,9 @@ function vud_node_template_suggestions($template_type, $plugin, $content_id) {
   $node = node_load($content_id);
   return array(
     $template_type,
-    $template_type. '_node',
-    $template_type. '_node_' . $plugin['name'],
-    $template_type. '_node_' . $plugin['name'] . '__' . $node->type,
+    $template_type . '_node',
+    $template_type . '_node_' . $plugin['name'],
+    $template_type . '_node_' . $plugin['name'] . '__' . $node->type,
   );
 }
 

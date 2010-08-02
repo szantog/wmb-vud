@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ * Provide views data and handlers for vud_comment.module
+ */
+
+/**
  * Implementation of hook_views_data_alter().
  */
 function vud_comment_views_data_alter(&$data) {

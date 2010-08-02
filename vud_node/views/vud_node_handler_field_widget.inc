@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ * Provide a handler for Vote Up/down widget field for nodes.
+ */
+
+/**
  * A handler that provides a Vote Up/Down widget field for nodes.
  */
 class vud_node_handler_field_widget extends views_handler_field {

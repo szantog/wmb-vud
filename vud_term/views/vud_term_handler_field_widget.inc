@@ -2,7 +2,12 @@
 // $Id$
 
 /**
- * A handler that provides a Vote Up/Down widget field for nodes.
+ * @file
+ * Provide a handler for Vote Up/down widget field for terms.
+ */
+
+/**
+ * A handler that provides a Vote Up/Down widget field for terms.
  */
 class vud_term_handler_field_widget extends views_handler_field {
   function query() {

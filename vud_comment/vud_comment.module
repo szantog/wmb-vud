@@ -188,9 +188,9 @@ function vud_comment_template_suggestions($template_type, $plugin, $content_id) 
   $node = node_load($comment->nid);
   return array(
     $template_type,
-    $template_type. '_comment',
-    $template_type. '_comment_' . $plugin['name'],
-    $template_type. '_comment_' . $plugin['name'] . '__' . $node->type,
+    $template_type . '_comment',
+    $template_type . '_comment_' . $plugin['name'],
+    $template_type . '_comment_' . $plugin['name'] . '__' . $node->type,
   );
 }
 

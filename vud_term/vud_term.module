@@ -167,9 +167,9 @@ function vud_term_template_suggestions($template_type, $plugin, $content_id) {
   $term = taxonomy_get_term($content_id);
   return array(
     $template_type,
-    $template_type. '_term',
-    $template_type. '_term_' . $plugin['name'],
-    $template_type. '_term_' . $plugin['name'] . '__' . $term->vid,
+    $template_type . '_term',
+    $template_type . '_term_' . $plugin['name'],
+    $template_type . '_term_' . $plugin['name'] . '__' . $term->vid,
   );
 }
 
