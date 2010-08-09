@@ -25,7 +25,7 @@ function vud_init() {
 function vud_help($path, $arg) {
   switch ($path) {
     case 'admin/help#vud':
-      $output .= '<p>'. t('Provides a configurable up/down voting widget for other modules to use.') .'</p>';
+      $output = '<p>'. t('Provides a configurable up/down voting widget for other modules to use.') .'</p>';
       return $output;
   }
 }
