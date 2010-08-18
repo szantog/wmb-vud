@@ -285,7 +285,7 @@ function vud_node_link($type, $object, $teaser = FALSE) {
           break;
       }
       if ($node_type && variable_get('vud_node_reset', 0) && user_access('reset vote up/down votes')) {
-        $tag = variable_get('vote_up_down_tag', 'vote');
+        $tag = variable_get('vud_tag', 'vote');
         $criteria = array(
           'content_type' => $type,
           'content_id' => $node->nid,
