@@ -165,11 +165,6 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
     $variables['class_down'] = 'down-inactive';
   }
 
-  // Set timestamp in session to force anonymous sessions in Pressflow
-  if ($user->uid === 0 && empty($_SESSION['vud_timestamp'])) {
-    $_SESSION['vud_timestamp'] = time();
-  }
-
   $token_up = drupal_get_token("vote/$type/$content_id/1/$tag/$widget_theme");
   $token_down = drupal_get_token("vote/$type/$content_id/-1/$tag/$widget_theme");
 
@@ -352,7 +347,7 @@ function vud_add_files($type, $plugin) {
  * Function for the main voting handler with Ajax support.
  */
 function vud_vote($type, $content_id, $value, $tag, $widget, $token) {
-  if (is_numeric($value) && drupal_valid_token($token, "vote/$type/$content_id/$value/$tag/$widget")) {
+  if (is_numeric($value) && drupal_valid_token($token, "vote/$type/$content_id/$value/$tag/$widget", TRUE)) {
     $vote = array();
     // Sanity-check the incoming values.
     if ($value > 0) {

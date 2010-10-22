@@ -12,9 +12,12 @@ module_load_include('inc', 'vud', 'vud.theme');  // Include the theme.inc file.
  * Implementation of hook_init().
  */
 function vud_init() {
-  // Expire anonymous sessions early for Pressflow (30 minutes)
+  // Remove anonymous sessions which were previously set to prevent pressflow
+  // page caching. This will eventually clean up those sessions over time.
+  // @todo: remove in a future release when it can be reasonably expected that
+  // no more sessions with this variable exist in the wild.
   $now = time();
-  if (!empty($_SESSION['vud_timestamp']) && $now - $_SESSION['vud_timestamp'] > 60 * 30) {
+  if (!empty($_SESSION['vud_timestamp'])) {
     unset($_SESSION['vud_timestamp']);
   }
 }
@@ -157,7 +160,7 @@ function vud_user_votes() {
  * Callback to reset votes on an object.
  */
 function vud_reset($type, $content_id, $tag, $token) {
-  if (drupal_valid_token($token, "votereset/$type/$content_id/$tag")) {
+  if (drupal_valid_token($token, "votereset/$type/$content_id/$tag", TRUE)) {
     $uid = votingapi_current_user_identifier();
     $criteria = array(
       'content_type' => $type,
