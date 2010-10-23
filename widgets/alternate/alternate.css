@@ -15,15 +15,16 @@
     height: 22px;
     width: 50px;
     margin-top: 1px;
+    background-image: url('plus.png');
 }
 
 .vud-widget-alternate .up-active,
 .vud-widget-alternate .up-inactive:hover {
-    background: url(plus_act.png) no-repeat center 3px;
+  background-position: 0px -7px;
 }
 
 .vud-widget-alternate .up-inactive {
-    background: url(plus_inact.png) no-repeat center 3px;
+  background-position: 0px -43px;
 }
 
 .vud-widget-alternate .up-active {
