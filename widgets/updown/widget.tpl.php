@@ -16,9 +16,11 @@
   <?php if ($show_links): ?>
     <a href="<?php print $link_up; ?>" rel="nofollow" class="<?php print $link_class_up; ?>">
       <div class="<?php print $class_up; ?>" title="<?php print t('Vote up!'); ?>">+</div>
+      <div class="element-invisible"><?php print t('Vote up!'); ?></div>
     </a>
     <a href="<?php print $link_down; ?>" rel="nofollow" class="<?php print $link_class_down; ?>">
       <div class="<?php print $class_down; ?>" title="<?php print t('Vote down!'); ?>">-</div>
+      <div class="element-invisible"><?php print t('Vote down!'); ?></div>
     </a>
   <?php endif; ?>
 </div>

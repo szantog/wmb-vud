@@ -18,7 +18,7 @@
 
   <div class="down-score clear-block">
     <?php if ($show_links): ?>
-      <a href="<?php print $link_down; ?>" rel="nofollow" class="<?php print "$link_class_down $class_down"; ?>" title="<?php print t('Vote down!'); ?>"></a>
+      <a href="<?php print $link_down; ?>" rel="nofollow" class="<?php print "$link_class_down $class_down"; ?>" title="<?php print t('Vote down!'); ?>"><div class="element-invisible"><?php print t('Vote down!'); ?></div></a>
     <?php endif; ?>
     <span class="down-current-score"><?php print $down_points; ?></span>
   </div>
