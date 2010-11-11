@@ -11,7 +11,7 @@
 <div class="vud-widget vud-widget-upanddown" id="<?php print $id; ?>">
   <div class="up-score clear-block">
     <?php if ($show_links): ?>
-      <a href="<?php print $link_up; ?>" rel="nofollow" class="<?php print "$link_class_up $class_up"; ?>" title="<?php print t('Vote up!'); ?>"></a>
+      <a href="<?php print $link_up; ?>" rel="nofollow" class="<?php print "$link_class_up $class_up"; ?>" title="<?php print t('Vote up!'); ?>"><div class="element-invisible"><?php print t('Vote up!'); ?></div></a>
     <?php endif; ?>
     <span class="up-current-score"><?php print $up_points; ?></span>
   </div>

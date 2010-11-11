@@ -12,7 +12,8 @@
     <div class="alternate-votes-display"><?php print $unsigned_points; ?></div>
     <?php if ($show_links): ?>
       <a href="<?php print $link_up; ?>" rel="nofollow" class="<?php print $link_class_up; ?>">
-        <div class="<?php print $class_up; ?>" title="<?php print t('Vote up!'); ?>">  </div>
+        <div class="<?php print $class_up; ?>" title="<?php print t('Vote up!'); ?>"></div>
+        <div class="element-invisible"><?php print t('Vote up!'); ?></div>
       </a>
     <?php endif; ?>
   <?php endif; ?>
