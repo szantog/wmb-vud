@@ -157,7 +157,6 @@ function vud_comment_link($type, $object, $teaser = FALSE) {
         );
       }
       if (variable_get('vud_comment_reset', 0) && user_access('reset vote up/down votes')) {
-        $tag = variable_get('vote_up_down_tag', 'vote');
         $criteria = array(
           'content_type' => $type,
           'content_id' => $comment->cid,
