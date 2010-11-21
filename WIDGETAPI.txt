@@ -116,6 +116,7 @@ function MODULEORTHEMENAME_WIDGETNAME_vud_widgets() {
     'title' => t('Default'),
     'widget template' => 'widget',
     'votes template' => 'votes',
+    'alter template variables' => 'callback_function'
   );
 }
 ----
@@ -124,6 +125,14 @@ You should include the 'widget template' line if you are including a
 widget.tpl.php and the 'votes template' line if you are including a
 votes.tpl.php. If you want the template named differently, the value of
 this line will set that.
++
+You should include the 'alter template variables' line if you need to
+modify variables that are passed to the widget templates. Naturally, you
+need to replace the 'callback_function' with the name of the callback
+function you want to use. The signature of the function is
+`callback_function($template_type, &$variables)` where `$template_type`
+can be 'widget' or 'votes' and `$variables` is a typically theme
+variables array.
 +
 If you create a WIDGETNAME.css file this will automatically be included.
 If you want this file to be different, add

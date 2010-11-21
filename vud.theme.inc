@@ -94,6 +94,10 @@ function vud_pseudo_theming($vote_entity, $template_type, $plugin, &$variables) 
   // let modules modify variables passed to the template
   $variables_type = 'vud_' . $template_type . '_template_variables';
   drupal_alter($variables_type, $variables);
+  // let widget modify variables passed to the template
+  if ($function = ctools_plugin_get_function($plugin, 'alter template variables')) {
+    $function($template_type, $variables);
+  }
 
   // and then provide template suggestions by hand
   $suggestions = module_invoke('vud_' . $vote_entity, 'template_suggestions', $template_type, $plugin, $variables['content_id']);
