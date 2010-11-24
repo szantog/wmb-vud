@@ -154,7 +154,7 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
     'tag' => $variables['tag'],
   );
   $criteria = $base_criteria + $uid;
-  $user_vote = votingapi_select_single_vote_value($criteria);
+  $user_vote = user_access('use vote up/down') ? votingapi_select_single_vote_value($criteria) : 0;
 
   if ($user_vote > 0) {
     $variables['class_up'] = 'up-active';
@@ -194,25 +194,6 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
   $variables['vote_count'] = $vote_count;
 
   $variables['unsigned_points'] = $vote_result;
-
-  $criteria = array(
-    'content_type' => $type,
-    'content_id' => $content_id,
-    'value_type' => 'points',
-    'tag' => $tag,
-    'function' => 'positives'
-  );
-  $positives = (int)votingapi_select_single_result_value($criteria);
-  $variables['up_points'] = $positives;
-  $criteria = array(
-    'content_type' => $type,
-    'content_id' => $content_id,
-    'value_type' => 'points',
-    'tag' => $tag,
-    'function' => 'negatives'
-  );
-  $negatives = (int)votingapi_select_single_result_value($criteria);
-  $variables['down_points'] = $negatives;
 
   if ($vote_result > 0) {
     $variables['class'] = 'positive';
