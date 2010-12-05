@@ -150,13 +150,15 @@ function vud_comment_link($type, $object, $teaser = FALSE) {
       $votes_display_mode = variable_get('vud_comment_votes', 1);
       $widget_theme = variable_get('vud_comment_widget', 'plain');
       $tag = variable_get('vud_tag', 'vote');
-      if ($votes_display_mode) {
+      $node = node_load($comment->nid);
+      $votable_node_type_comment = in_array($node->type, variable_get('vud_comment_node_types', array()), TRUE);
+      if ($votable_node_type_comment && $votes_display_mode) {
         $links['vud_comment_votes_count'] = array(
           'title' => theme('vud_votes', $comment->cid, $type, $tag, $widget_theme),
           'html' => TRUE,
         );
       }
-      if (variable_get('vud_comment_reset', 0) && user_access('reset vote up/down votes')) {
+      if ($votable_node_type_comment && variable_get('vud_comment_reset', 0) && user_access('reset vote up/down votes')) {
         $criteria = array(
           'content_type' => $type,
           'content_id' => $comment->cid,
