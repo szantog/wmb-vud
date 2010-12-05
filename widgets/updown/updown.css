@@ -43,12 +43,12 @@
   font-size: 20px;
 }
 
-.vud-widget-updown .vud-link-up div {
+.vud-widget-updown div.updown-up {
   float: left;
   margin-right: 3px;
 }
 
-.vud-widget-updown .vud-link-down div {
+.vud-widget-updown div.updown-down {
   float: left;
   margin-left: 3px;
 }

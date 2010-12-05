@@ -215,6 +215,8 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
   $link_down = url("vote/$type/$content_id/-1/$tag/$widget_theme/$token_down");
   $message_on_deny = variable_get('vud_message_on_deny', FALSE);
   $variables['show_links'] = !$readonly || $message_on_deny;
+  $variables['show_up_as_link'] = $variables['show_links'] && ($user_vote <= 0);
+  $variables['show_down_as_link'] = $variables['show_links'] && ($user_vote >= 0);
   if ($readonly) {
     $variables['link_class_up'] .= ' denied';
     $variables['link_class_down'] .= ' denied';
@@ -334,27 +336,41 @@ function vud_add_files($type, $plugin) {
 function vud_vote($type, $content_id, $value, $tag, $widget, $token) {
   if (is_numeric($value) && drupal_valid_token($token, "vote/$type/$content_id/$value/$tag/$widget", TRUE)) {
     $vote = array();
+
+    $casted_vote_criteria = array(
+      'content_type' => $type,
+      'content_id' => $content_id,
+      'tag' => $tag,
+    ) + votingapi_current_user_identifier();
+    $casted_vote = votingapi_select_single_vote_value($casted_vote_criteria);
+
     // Sanity-check the incoming values.
     if ($value > 0) {
-      $vote['value'] = 1;
+        $value = 1;
     }
     elseif ($value < 0) {
-      $vote['value'] = -1;
+      $value = -1;
     }
     else {
-      $vote['value'] = 0;
+      $value = FALSE;
     }
 
-    $vote['value_type'] = 'points';
-    $tag = $tag ? $tag : variable_get('vud_tag', 'vote');
-    $vote['tag'] = $tag;
+    // Do not allow vote with the same value
+    if ( ($casted_vote > 0 && $value > 0) || ($casted_vote < 0 && $value < 0) ) {
+      $value = FALSE;
+    }
 
-    $vote['content_id'] = $content_id;
-    $vote['content_type'] = $type;
-    $vote['tag'] = $tag;
-    $votes = array(0 => $vote);
-    drupal_alter('vud_votes', $votes);
-    votingapi_set_votes($votes);
+    if ($value !== FALSE) {
+      $vote['value'] = $value;
+      $vote['value_type'] = 'points';
+      $tag = $tag ? $tag : variable_get('vud_tag', 'vote');
+      $vote['tag'] = $tag;
+      $vote['content_id'] = $content_id;
+      $vote['content_type'] = $type;
+      $votes = array(0 => $vote);
+      drupal_alter('vud_votes', $votes);
+      votingapi_set_votes($votes);
+    }
   }
   else {
     watchdog('vud',

@@ -6,13 +6,9 @@
   float: left;
 }
 
-.vud-widget-upanddown a {
-  text-decoration: none;
-  float: left;
-}
-
 .vud-widget-upanddown a.vud-link-up span,
 .vud-widget-upanddown a.vud-link-down span {
+  text-decoration: none;
   margin-right: 7px;
 }
 
@@ -40,6 +36,7 @@
 .vud-widget-upanddown .down-inactive,
 .vud-widget-upanddown .up-active,
 .vud-widget-upanddown .down-active {
+  float: left;
   display: block;
   width: 20px;
   height: 22px;
