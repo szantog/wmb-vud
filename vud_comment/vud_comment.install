@@ -27,6 +27,7 @@ function vud_comment_uninstall() {
   drupal_uninstall_schema('vud_comment');
   variable_del('vud_comment_node_types');
   variable_del('vud_comment_widget');
+  variable_del('vud_comment_widget_display');
   variable_del('vud_comment_votes');
   variable_del('vud_comment_reset');
 }
