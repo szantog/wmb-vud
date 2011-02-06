@@ -4,4 +4,4 @@ description = "Provides a configurable up/down voting widget for other modules t
 dependencies[] = votingapi
 dependencies[] = ctools
 package = Voting
-core = 6.x
+core = 7.x
