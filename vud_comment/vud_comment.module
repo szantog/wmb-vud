@@ -107,6 +107,9 @@ function vud_comment_admin_settings_validate($form, &$form_state) {
 function vud_comment_comment(&$comment, $op) {
   switch ($op) {
     case 'view':
+      if (!isset($comment->cid)) {
+        return;
+      }
       $type = _vud_comment_get_node_type($comment->nid);
       $comment_allow = in_array($type, variable_get('vud_comment_node_types', array()), TRUE);
       if ($comment_allow && user_access('use vote up/down on comments')) {
