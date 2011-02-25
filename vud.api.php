@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * This file contains module hooks for users of Vote Up/down.

@@ -1,4 +1,3 @@
-; $Id$
 name = Vote Up/Down Terms
 description = "Allows adding an up/down voting widget to taxonomy terms on a node."
 dependencies[] = taxonomy

@@ -1,4 +1,3 @@
-// $Id$
 
 = Widget API - Vote Up/Down =
 

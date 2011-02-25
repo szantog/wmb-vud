@@ -1,4 +1,3 @@
-# $Id$
 #
 # Spanish translation of Vote Up/Down (6.x-2.0-rc1)
 # Copyright 2010 Marco Villegas <marvil07@gmail.com>

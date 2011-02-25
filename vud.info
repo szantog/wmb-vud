@@ -1,4 +1,3 @@
-; $Id$
 name = Vote Up/Down
 description = "Provides a configurable up/down voting widget for other modules to use."
 dependencies[] = votingapi

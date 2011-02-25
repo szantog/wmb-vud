@@ -1,4 +1,3 @@
-; $Id$
 name = Vote Up/Down Comments
 description = "Allows adding an up/down voting widget to comments."
 dependencies[] = comment
