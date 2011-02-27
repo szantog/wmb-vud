@@ -141,6 +141,7 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
   $uid = votingapi_current_user_identifier();
 
   ctools_add_js('ajax-responder');
+  ctools_include('ajax');
   if ($type == 'comment') {
     drupal_add_css(drupal_get_path('module', 'vud_comment') . '/vud_comment.css');
   }
