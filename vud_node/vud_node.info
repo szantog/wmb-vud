@@ -2,4 +2,4 @@ name = Vote Up/Down Nodes
 description = "Allows adding an up/down voting widget to selected content types."
 dependencies[] = vud
 package = Voting
-core = 6.x
+core = 7.x

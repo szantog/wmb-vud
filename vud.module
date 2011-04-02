@@ -8,6 +8,63 @@
 module_load_include('inc', 'vud', 'vud.theme');  // Include the theme.inc file.
 
 /**
+ * Implementation of hook_menu().
+ */
+function vud_menu() {
+  $items = array();
+
+  $items['admin/config/search/voteupdown'] = array(
+    'title'            => 'Vote Up/Down',
+    'description'      => 'Control the functioning of Vote Up/Down.',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('vud_admin_advanced_settings'),
+    'access arguments' => array('administer vote up/down'),
+    'type'             => MENU_NORMAL_ITEM,
+  );
+
+  $items['admin/config/search/voteupdown/advanced'] = array(
+    'title'  => 'General',
+    'type'   => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items['vote/%/%/%/%/%/%'] = array(
+    'title'            => 'Vote',
+    'page callback'    => 'vud_vote',
+    'page arguments'   => array(1, 2, 3, 4, 5, 6),
+    'access arguments' => array('use vote up/down'),
+    'type'             => MENU_CALLBACK,
+    'file'             => 'vud.theme.inc',
+  );
+
+  $items['votereset/%/%/%/%'] = array(
+    'title'            => 'Reset vote',
+    'page callback'    => 'vud_reset',
+    'page arguments'   => array(1, 2, 3, 4),
+    'access arguments' => array('reset vote up/down votes'),
+    'type'             => MENU_CALLBACK,
+  );
+
+  $items['user/%user/votes'] = array(
+    'title'            => 'Votes',
+    'page callback'    => 'vud_user_votes',
+    'page arguments'   => array(1),
+    'access arguments' => array('access vote up/down statistics'),
+    'type'             => MENU_LOCAL_TASK,
+  );
+
+  $items['vud/%ctools_js/denied/%'] = array(
+    'title'            => 'Vote denied',
+    'page callback'    => 'vud_denied_vote',
+    'page arguments'   => array(1, 3),
+    'access arguments' => array('access content'),
+    'type'             => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
  * Implementation of hook_init().
  */
 function vud_init() {
@@ -53,67 +110,27 @@ function vud_admin_advanced_settings() {
 }
 
 /**
- * Implementation of hook_menu().
+ * Implementation of hook_permission().
  */
-function vud_menu() {
-  $items = array();
-
-  $items['admin/settings/voteupdown'] = array(
-    'title'            => 'Vote Up/Down',
-    'description'      => 'Control the functioning of Vote Up/Down.',
-    'page callback'    => 'drupal_get_form',
-    'page arguments'   => array('vud_admin_advanced_settings'),
-    'access arguments' => array('administer vote up/down'),
-    'type'             => MENU_NORMAL_ITEM,
+function vud_permission() {
+  return array(
+    'use vote up/down' => array(
+      'title' => t('Use Vote Up/Down'),
+      'description' => t('Grant users the ability to cast votes'),
+    ),
+    'administer vote up/down' => array(
+      'title' => t('Administer Vote Up/Down'),
+      'description' => t('Adjust the settings of the Vote Up/Down module'),
+    ), 
+    'access vote up/down statistics' => array(
+      'title' => t('Access Vote Up/Down Statistics'),
+      'description' => t('Permission to see who is voting on what'),
+    ), 
+    'reset vote up/down votes' => array(
+      'title' => t('Reset Votes'),
+      'description' => t('Reset all of the Up/Down votes on the site'),
+    ),
   );
-
-  $items['admin/settings/voteupdown/advanced'] = array(
-    'title'  => 'General',
-    'type'   => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-
-  $items['vote/%/%/%/%/%/%'] = array(
-    'title'            => 'Vote',
-    'page callback'    => 'vud_vote',
-    'page arguments'   => array(1, 2, 3, 4, 5, 6),
-    'access arguments' => array('use vote up/down'),
-    'type'             => MENU_CALLBACK,
-    'file'             => 'vud.theme.inc',
-  );
-
-  $items['votereset/%/%/%/%'] = array(
-    'title'            => 'Reset vote',
-    'page callback'    => 'vud_reset',
-    'page arguments'   => array(1, 2, 3, 4),
-    'access arguments' => array('reset vote up/down votes'),
-    'type'             => MENU_CALLBACK,
-  );
-
-  $items['user/%user/votes'] = array(
-    'title'            => 'Votes',
-    'page callback'    => 'vud_user_votes',
-    'page arguments'   => array(1),
-    'access arguments' => array('access vote up/down statistics'),
-    'type'             => MENU_LOCAL_TASK,
-  );
-
-  $items['vud/%ctools_js/denied/%'] = array(
-    'title'            => 'Vote denied',
-    'page callback'    => 'vud_denied_vote',
-    'page arguments'   => array(1, 3),
-    'access arguments' => array('access content'),
-    'type'             => MENU_CALLBACK,
-  );
-
-  return $items;
-}
-
-/**
- * Implementation of hook_perm().
- */
-function vud_perm() {
-  return array('use vote up/down', 'administer vote up/down', 'access vote up/down statistics', 'reset vote up/down votes');
 }
 
 /**

@@ -6,24 +6,9 @@
  */
 
 /**
- * Implementation of hook_install().
- */
-function vud_install() {
-  drupal_install_schema('vud');
-}
-
-/**
- * Implementation of hook_schema().
- */
-function vud_schema() {
-  return array();
-}
-
-/**
  * Implementation of hook_uninstall().
  */
 function vud_uninstall() {
-  drupal_uninstall_schema('vud');
   variable_del('vud_tag');
   variable_del('vud_reset_vote');
 }

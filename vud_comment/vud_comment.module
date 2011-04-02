@@ -9,27 +9,33 @@ define('VUD_COMMENT_DISPLAY_HIDDEN', 0);
 define('VUD_COMMENT_DISPLAY_NORMAL', 1);
 
 /**
- * Implementation of hook_perm().
- */
-function vud_comment_perm() {
-  return array('administer vote up/down on comments', 'use vote up/down on comments');
-}
-
-/**
  * Implementation of hook_menu().
  */
 function vud_comment_menu() {
   $items = array();
-  $items['admin/settings/voteupdown/comment'] = array(
+  $items['admin/config/search/voteupdown/comment'] = array(
     'title'            => 'Comments',
     'description'      => 'Vote Up/Down Comment settings',
-    'page callback'    => 'drupal_get_form',
     'page arguments'   => array('vud_comment_admin_settings'),
     'access arguments' => array('administer vote up/down on comments'),
     'type'             => MENU_LOCAL_TASK,
   );
 
   return $items;
+}
+
+/**
+ * Implementation of hook_permission().
+ */
+function vud_comment_permission() {
+  return array(
+    'administer vote up/down on comments' => array(
+      'title' => t('Administer Vote Up/Down on Comments'),
+    ),
+    'use vote up/down on comments' => array(
+      'title' => t('Vote on Comments'),
+    ),
+  );
 }
 
 /**
@@ -41,7 +47,7 @@ function vud_comment_admin_settings() {
     '#title'       => t('Node types'),
     '#description' => t('Select the node types for which voting on comments will be activated.'),
     '#default_value' => variable_get('vud_comment_node_types', array()),
-    '#options'       => node_get_types('names'),
+    '#options'       => node_type_get_names(),
   );
   $form['vud_comment_widget'] = array(
     '#type'          => 'radios',
@@ -101,25 +107,21 @@ function vud_comment_admin_settings_validate($form, &$form_state) {
 }
 
 /**
- * Implementation of hook_comment().
+ * Implementation of hook_comment_view().
  */
-function vud_comment_comment(&$comment, $op) {
-  switch ($op) {
-    case 'view':
-      if (!isset($comment->cid)) {
-        return;
-      }
-      $type = _vud_comment_get_node_type($comment->nid);
-      $comment_allow = in_array($type, variable_get('vud_comment_node_types', array()), TRUE);
-      if ($comment_allow && user_access('use vote up/down on comments')) {
-        $tag = variable_get('vud_tag', 'vote');
-        $widget = variable_get('vud_comment_widget', 'plain');
-        $comment->vud_comment_widget = theme('vud_widget', $comment->cid, 'comment', $tag, $widget);
-        if (variable_get('vud_comment_widget_display', VUD_COMMENT_DISPLAY_NORMAL) == VUD_COMMENT_DISPLAY_NORMAL) {
-          $comment->comment = $comment->vud_comment_widget . $comment->comment;
-        }
-      }
-      break;
+function vud_comment_comment_view($comment, $view_mode, $langcode) {
+  if (!isset($comment->cid)) {
+    return;
+  }
+  $type = _vud_comment_get_node_type($comment->nid);
+  $comment_allow = in_array($type, variable_get('vud_comment_node_types', array()), TRUE);
+  if ($comment_allow && user_access('use vote up/down on comments')) {
+    $tag = variable_get('vud_tag', 'vote');
+    $widget = variable_get('vud_comment_widget', 'plain');
+    $comment->vud_comment_widget = theme('vud_widget', $comment->cid, 'comment', $tag, $widget);
+    if (variable_get('vud_comment_widget_display', VUD_COMMENT_DISPLAY_NORMAL) == VUD_COMMENT_DISPLAY_NORMAL) {
+      $comment->comment = $comment->vud_comment_widget . $comment->comment;
+    }
   }
 }
 

@@ -3,4 +3,4 @@ description = "Allows adding an up/down voting widget to taxonomy terms on a nod
 dependencies[] = taxonomy
 dependencies[] = vud
 package = Voting
-core = 6.x
+core = 7.x

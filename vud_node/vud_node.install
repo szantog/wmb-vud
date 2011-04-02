@@ -6,24 +6,9 @@
  */
 
 /**
- * Implementation of hook_install().
- */
-function vud_node_install() {
-  drupal_install_schema('vud_node');
-}
-
-/**
- * Implementation of hook_schema().
- */
-function vud_node_schema() {
-  return array();
-}
-
-/**
  * Implementation of hook_uninstall().
  */
 function vud_node_uninstall() {
-  drupal_uninstall_schema('vud_node');
   variable_del('vud_node_types');
   variable_del('vud_node_widget');
   variable_del('vud_node_widget_show');

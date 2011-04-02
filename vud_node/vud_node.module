@@ -13,10 +13,24 @@ define('VUD_NODE_DISPLAY_BOTH', 3);
 define('VUD_NODE_WIDGET_MESSAGE_TEASER_DENIED', 2);
 
 /**
- * Implementation of hook_perm().
+ * Implementation of hook_permission().
  */
-function vud_node_perm() {
-  return array('view vote up/down count on nodes', 'use vote up/down on nodes', 'administer vote up/down on nodes', 'see vote up/down node stats');
+function vud_node_permission() {
+  return array(
+    'view vote up/down count on nodes' => array(
+      'title' => t('View Vote Count on Nodes'),
+    ),
+    'use vote up/down on nodes' => array(
+      'title' => t('Vote on Nodes'),
+      'description' => t('Allow users to vote nodes up/down'),
+    ),
+    'administer vote up/down on nodes' => array(
+      'title' => t('Administer Voting on Nodes'),
+    ),
+    'see vote up/down node stats' => array(
+      'title' => t('View Voting Statistics for Nodes'),
+    ),
+  );
 }
 
 /**
@@ -25,10 +39,9 @@ function vud_node_perm() {
 function vud_node_menu() {
   $items = array();
 
-  $items['admin/settings/voteupdown/node'] = array(
+  $items['admin/config/search/voteupdown/node'] = array(
     'title'            => 'Nodes',
     'description'      => 'Vote Up/Down Node settings',
-    'page callback'    => 'drupal_get_form',
     'page arguments'   => array('vud_node_admin_settings'),
     'access arguments' => array('administer vote up/down on nodes'),
     'weight'           => -10,
@@ -79,7 +92,7 @@ function vud_node_admin_settings() {
     '#title'         => t('Node types'),
     '#description'   => t('Select the node types for which you want to activate voting.'),
     '#default_value' => variable_get('vud_node_types', array()),
-    '#options'       => node_get_types('names'),
+    '#options'       => node_type_get_names(),
   );
   $form['vud_node_widget'] = array(
     '#title'         => t('Widget selection'),
@@ -126,73 +139,69 @@ function vud_node_vud_widget_message_codes_alter(&$widget_message_codes) {
 }
 
 /**
- * Implementation of hook_nodeapi().
+ * Implementation of hook_node_view().
  */
-function vud_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  switch ($op) {
-    case 'view':
-      // avoid showing the widget in some node builds
-      $exclude_modes = array(
-        NODE_BUILD_PREVIEW,
-        NODE_BUILD_SEARCH_INDEX,
-        NODE_BUILD_SEARCH_RESULT,
-        NODE_BUILD_RSS,
-      );
-      if (in_array($node->build_mode, $exclude_modes)) {
-        break;
-      }
-      if (($can_edit=user_access('use vote up/down on nodes')) || user_access('view vote up/down count on nodes')) {
-        $node_type = in_array($node->type, variable_get('vud_node_types', array()), TRUE);
-        $widget_showmode = variable_get('vud_node_widget_show', VUD_NODE_DISPLAY_BOTH);
-        $tag = variable_get('vud_tag', 'vote');
-        $widget = variable_get('vud_node_widget', 'plain');
-        $vote_on_teaser = (bool)variable_get('vud_node_widget_vote_on_teaser', TRUE);
-        $teaser = $a3;
+function vud_node_node_view($node, $view_mode, $langcode) {
+  // avoid showing the widget in some node builds
+  $exclude_modes = array(
+    NODE_BUILD_PREVIEW,
+    NODE_BUILD_SEARCH_INDEX,
+    NODE_BUILD_SEARCH_RESULT,
+    NODE_BUILD_RSS,
+  );
+  if (in_array($node->build_mode, $exclude_modes)) {
+    break;
+  }
+  if (($can_edit=user_access('use vote up/down on nodes')) || user_access('view vote up/down count on nodes')) {
+    $node_type = in_array($node->type, variable_get('vud_node_types', array()), TRUE);
+    $widget_showmode = variable_get('vud_node_widget_show', VUD_NODE_DISPLAY_BOTH);
+    $tag = variable_get('vud_tag', 'vote');
+    $widget = variable_get('vud_node_widget', 'plain');
+    $vote_on_teaser = (bool)variable_get('vud_node_widget_vote_on_teaser', TRUE);
+    $teaser = $a3;
 
-        $widget_message_code = VUD_WIDGET_MESSAGE_ERROR;
-        if (!$can_edit) {
-          $widget_message_code = VUD_WIDGET_MESSAGE_DENIED;
-        }
-        elseif (!$vote_on_teaser) {
-          $widget_message_code = VUD_NODE_WIDGET_MESSAGE_TEASER_DENIED;
-        }
+    $widget_message_code = VUD_WIDGET_MESSAGE_ERROR;
+    if (!$can_edit) {
+      $widget_message_code = VUD_WIDGET_MESSAGE_DENIED;
+    }
+    elseif (!$vote_on_teaser) {
+      $widget_message_code = VUD_NODE_WIDGET_MESSAGE_TEASER_DENIED;
+    }
 
-        if ($node_type) {
+    if ($node_type) {
 
-          switch ($widget_showmode) {
-            case VUD_NODE_DISPLAY_TEASER_ONLY:
-              if ($teaser == 1) {
-                $node->content['vud_node_widget_display'] = array(
-                  '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, !$vote_on_teaser || !$can_edit, $widget_message_code),
-                  '#weight' => -10,
-                );
-              }
-              break;
-            case VUD_NODE_DISPLAY_FULL_ONLY:
-              if ($teaser == 0) {
-                $node->content['vud_node_widget_display'] = array(
-                  '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, !$can_edit, $widget_message_code),
-                  '#weight' => -10,
-                );
-              }
-              break;
-            case VUD_NODE_DISPLAY_BOTH:
-              if ($teaser == 1) {
-                $readonly = !$vote_on_teaser || !$can_edit;
-              }
-              else {
-                $readonly = !$can_edit;
-              }
-              $node->content['vud_node_widget_display'] = array(
-                '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, $readonly, $widget_message_code),
-                '#weight' => -10,
-              );
-              break;
+      switch ($widget_showmode) {
+        case VUD_NODE_DISPLAY_TEASER_ONLY:
+          if ($teaser == 1) {
+            $node->content['vud_node_widget_display'] = array(
+              '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, !$vote_on_teaser || !$can_edit, $widget_message_code),
+              '#weight' => -10,
+            );
           }
-
-        }
+          break;
+        case VUD_NODE_DISPLAY_FULL_ONLY:
+          if ($teaser == 0) {
+            $node->content['vud_node_widget_display'] = array(
+              '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, !$can_edit, $widget_message_code),
+              '#weight' => -10,
+            );
+          }
+          break;
+        case VUD_NODE_DISPLAY_BOTH:
+          if ($teaser == 1) {
+            $readonly = !$vote_on_teaser || !$can_edit;
+          }
+          else {
+            $readonly = !$can_edit;
+          }
+          $node->content['vud_node_widget_display'] = array(
+            '#value' => theme('vud_widget', $node->nid, 'node', $tag, $widget, $readonly, $widget_message_code),
+            '#weight' => -10,
+          );
+          break;
       }
-      break;
+
+    }
   }
 }
 
