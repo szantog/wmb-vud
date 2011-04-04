@@ -19,18 +19,15 @@ function vud_comment_views_data_alter(&$data) {
   );
 }
 
+
+
 /**
  * Implementation of hook_views_handlers().
  */
 function vud_comment_views_handlers() {
   return array(
-    'info' => array(
-      'path' => drupal_get_path('module', 'vud_comment') . '/views'
-    ),
-    'handlers' => array(
-      'vud_comment_handler_field_widget' => array(
-        'parent' => 'views_handler_field',
-      ),
+    'vud_comment_handler_field_widget' => array(
+      'parent' => 'views_handler_field',
     ),
   );
 }

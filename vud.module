@@ -235,20 +235,20 @@ function vud_votingapi_results_alter(&$cache, $entity_type, $entity_id) {
   // positive points
   $sql  = "SELECT SUM(v.value) as value_positives, v.tag ";
   $sql .= "FROM {votingapi_vote} v ";
-  $sql .= "WHERE v.entity_type = '%s' AND v.entity_id = %d AND v.value_type = 'points' AND v.value > 0 ";
+  $sql .= "WHERE v.entity_type = :entity_type AND v.entity_id = :entity_id AND v.value_type = 'points' AND v.value > 0 ";
   $sql .= "GROUP BY v.value_type, v.tag";
-  $result = db_query($sql, $entity_type, $entity_id);
-  while ($record = db_fetch_object($result)) {
+  $result = db_query($sql, array(':entity_type' => $entity_type, ':entity_id' => $entity_id));
+  foreach ($result as $record) {
     $cache[$record->tag]['points']['positives'] = $record->value_positives;
   }
 
   // negative points
   $sql  = "SELECT SUM(v.value) as value_negatives, v.tag ";
   $sql .= "FROM {votingapi_vote} v ";
-  $sql .= "WHERE v.entity_type = '%s' AND v.entity_id = %d AND v.value_type = 'points' AND v.value < 0 ";
+  $sql .= "WHERE v.entity_type = :entity_type AND v.entity_id = :entity_id AND v.value_type = 'points' AND v.value < 0 ";
   $sql .= "GROUP BY v.value_type, v.tag";
-  $result = db_query($sql, $entity_type, $entity_id);
-  while ($record = db_fetch_object($result)) {
+  $result = db_query($sql, array(':entity_type' => $entity_type, ':entity_id' => $entity_id));
+  foreach ($result as $record) {
     $cache[$record->tag]['points']['negatives'] = $record->value_negatives;
   }
 }
