@@ -18,8 +18,8 @@ function vud_upanddown_vud_widgets() {
 
 function vud_widget_upanddown_alter_template_vars($template_type, &$variables) {
   $criteria = array(
-    'content_type' => $variables['type'],
-    'content_id' => $variables['content_id'],
+    'entity_type' => $variables['type'],
+    'entity_id' => $variables['entity_id'],
     'value_type' => 'points',
     'tag' => $variables['tag'],
     'function' => 'positives'
@@ -28,8 +28,8 @@ function vud_widget_upanddown_alter_template_vars($template_type, &$variables) {
   $variables['up_points'] = $positives;
 
   $criteria = array(
-    'content_type' => $variables['type'],
-    'content_id' => $variables['content_id'],
+    'entity_type' => $variables['type'],
+    'entity_id' => $variables['entity_id'],
     'value_type' => 'points',
     'tag' => $variables['tag'],
     'function' => 'negatives'

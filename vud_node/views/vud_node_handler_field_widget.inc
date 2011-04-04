@@ -29,7 +29,7 @@ class vud_node_handler_field_widget extends views_handler_field {
     $widget = '';
     if (($can_edit = user_access('use vote up/down on nodes')) || user_access('view vote up/down count on nodes')) {
       $nid = $values->nid;
-      $type = db_result(db_query("SELECT type FROM {node} WHERE nid = '%d'", $nid));
+      $type = db_query("SELECT type FROM {node} WHERE nid = :nid", array(':nid' => $nid))->fetchField();
       $valid_type = in_array($type, variable_get('vud_node_types', array()), TRUE);
 
       if ($valid_type) {
@@ -37,7 +37,15 @@ class vud_node_handler_field_widget extends views_handler_field {
         $widget_type = variable_get('vud_node_widget', 'plain');
         $widget_message_code = (!$can_edit) ? VUD_WIDGET_MESSAGE_DENIED : VUD_WIDGET_MESSAGE_ERROR;
 
-        $widget = theme('vud_widget', $nid, 'node', $tag, $widget_type, !$can_edit, $widget_message_code);
+        $variables = array(
+          'entity_id' => $nid,
+          'type' => 'node',
+          'tag' => $tag,
+          'widget_type' => $widget_type,
+          'readonly' => !$can_edit,
+          'widget_message_code' => $widget_message_code,
+        );
+        $widget = theme('vud_widget', $variables);
       }
     }
 

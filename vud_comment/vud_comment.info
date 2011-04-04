@@ -4,3 +4,6 @@ dependencies[] = comment
 dependencies[] = vud
 package = Voting
 core = 7.x
+
+; Views field handlers
+files[] = views/vud_comment_handler_field_widget.inc

@@ -6,7 +6,7 @@
  */
 
 /**
- * A handler that provides a Vote Up/Down widget field for nodes.
+ * A handler that provides a Vote Up/Down widget field for comments.
  */
 class vud_comment_handler_field_widget extends views_handler_field {
   function query() {
@@ -27,13 +27,20 @@ class vud_comment_handler_field_widget extends views_handler_field {
 
   function render($values) {
     $widget = '';
-    $query = 'SELECT n.type FROM {comments} c LEFT JOIN {node} n ON c.nid = n.nid WHERE c.cid = %d';
-    $type = db_result(db_query($query, $values->cid));
+    $query = 'SELECT n.type FROM {comments} c LEFT JOIN {node} n ON c.nid = n.nid WHERE c.cid = :cid';
+    $type = db_query($query, array(':cid' => $values->cid))->fetchField();
     $comment_allow = in_array($type, variable_get('vud_comment_node_types', array()), TRUE);
     if ($comment_allow && user_access('use vote up/down on comments')) {
       $tag = variable_get('vud_tag', 'vote');
-      $widget_type = variable_get('vud_comment_widget', 'plain');
-      $widget = theme('vud_widget', $values->cid, 'comment', $tag, $widget_type);
+      $widget_theme = variable_get('vud_comment_widget', 'plain');
+
+      $variables = array(
+        'entity_id' => $values->cid,
+        'type' => 'comment',
+        'tag' => $tag,
+        'widget_theme' => $widget_theme,
+      );
+      $widget = theme('vud_widget', $variables);
     }
 
     return $widget;

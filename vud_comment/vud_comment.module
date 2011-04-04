@@ -113,13 +113,22 @@ function vud_comment_comment_view($comment, $view_mode, $langcode) {
   if (!isset($comment->cid)) {
     return;
   }
+
   $type = _vud_comment_get_node_type($comment->nid);
   $comment_allow = in_array($type, variable_get('vud_comment_node_types', array()), TRUE);
   if ($comment_allow && user_access('use vote up/down on comments')) {
     $tag = variable_get('vud_tag', 'vote');
-    $widget = variable_get('vud_comment_widget', 'plain');
-    $comment->vud_comment_widget = theme('vud_widget', $comment->cid, 'comment', $tag, $widget);
+    $widget_theme = variable_get('vud_comment_widget', 'plain');
+
+    $variables = array(
+      'entity_id' => $comment->cid,
+      'type' => 'comment',
+      'tag' => $tag,
+      'widget_theme' => $widget_theme,
+    );
+    $comment->vud_comment_widget = theme('vud_widget', $variables);
     if (variable_get('vud_comment_widget_display', VUD_COMMENT_DISPLAY_NORMAL) == VUD_COMMENT_DISPLAY_NORMAL) {
+      // TODO: Fix.
       $comment->comment = $comment->vud_comment_widget . $comment->comment;
     }
   }
@@ -136,11 +145,11 @@ function vud_comment_preprocess_comment(&$variables) {
     return;
   }
   // Get total votes for this comment.
-  $content_id = $variables['comment']->cid;
+  $entity_id = $variables['comment']->cid;
   $tag = variable_get('vud_tag', 'vote');
   $criteria = array(
-    'content_type' => 'comment',
-    'content_id' => $content_id,
+    'entity_type' => 'comment',
+    'entity_id' => $entity_id,
     'value_type' => 'points',
     'tag' => $tag,
     'function' => 'sum'
@@ -156,7 +165,7 @@ function vud_comment_preprocess_comment(&$variables) {
  * Function to return the node type of a particular node ID.
  */
 function _vud_comment_get_node_type($nid) {
-  return db_result(db_query("SELECT type from {node} where nid = %d", $nid));
+  return db_query("SELECT type from {node} where nid = :nid", array(':nid' => $nid))->fetchField();
 }
 
 /**
@@ -180,8 +189,8 @@ function vud_comment_link($type, $object, $teaser = FALSE) {
       }
       if ($votable_node_type_comment && variable_get('vud_comment_reset', 0) && user_access('reset vote up/down votes')) {
         $criteria = array(
-          'content_type' => $type,
-          'content_id' => $comment->cid,
+          'entity_type' => $type,
+          'entity_id' => $comment->cid,
           'tag' => $tag,
         );
         $criteria += votingapi_current_user_identifier();
@@ -204,8 +213,8 @@ function vud_comment_link($type, $object, $teaser = FALSE) {
 /**
  * Implementation of vud hook_template_suggestions().
  */
-function vud_comment_template_suggestions($template_type, $plugin, $content_id) {
-  $comment = _comment_load($content_id);
+function vud_comment_template_suggestions($template_type, $plugin, $entity_id) {
+  $comment = comment_load($entity_id);
   $node = node_load($comment->nid);
   return array(
     $template_type,

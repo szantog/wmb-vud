@@ -108,9 +108,9 @@ function _vud_term_generate_table(&$node) {
   $header = array();
   $rows = array();
   foreach ($node->taxonomy as $term => $tdetails) {
-    $content_id =  $tdetails->tid;
+    $entity_id =  $tdetails->tid;
     $tag = "n$node->nid";
-    $reset_token = drupal_get_token("votereset/term/$content_id/$tag");
+    $reset_token = drupal_get_token("votereset/term/$entity_id/$tag");
     if (variable_get('vud_term_reset', 0) && user_access('reset vote up/down votes')) {
       $header = array(
         array('data' => t('Term')),
@@ -122,9 +122,9 @@ function _vud_term_generate_table(&$node) {
       $rows[] = array(
         $tdetails->name,
         $tdetails->description,
-        theme('vud_widget', $content_id, "term", $tag, $widget),
-        "<span id=\"total-votes-term-$content_id\">". _vud_term_get_row_votes($content_id, $tag) .'</span>',
-        l('Reset your vote', "votereset/term/$content_id/$tag/$reset_token"),
+        theme('vud_widget', $entity_id, "term", $tag, $widget),
+        "<span id=\"total-votes-term-$entity_id\">". _vud_term_get_row_votes($entity_id, $tag) .'</span>',
+        l('Reset your vote', "votereset/term/$entity_id/$tag/$reset_token"),
       );
     }
     else {
@@ -137,8 +137,8 @@ function _vud_term_generate_table(&$node) {
       $rows[] = array(
         $tdetails->name,
         $tdetails->description,
-        theme('vud_widget', $content_id, "term", $tag, $widget),
-        "<span id=\"total-votes-term-$content_id\">". _vud_term_get_row_votes($content_id, $tag) .'</span>',
+        theme('vud_widget', $entity_id, "term", $tag, $widget),
+        "<span id=\"total-votes-term-$entity_id\">". _vud_term_get_row_votes($entity_id, $tag) .'</span>',
       );
     }
   }
@@ -151,10 +151,10 @@ function _vud_term_generate_table(&$node) {
 /**
  * Function to get votes for a particular term row on a node.
  */
-function _vud_term_get_row_votes($content_id, $tag) {
+function _vud_term_get_row_votes($entity_id, $tag) {
   $criteria = array(
-    'content_type' => 'term',
-    'content_id' => $content_id,
+    'entity_type' => 'term',
+    'entity_id' => $entity_id,
     'value_type' => 'points',
     'tag' => $tag,
     'function' => 'sum'
@@ -166,8 +166,8 @@ function _vud_term_get_row_votes($content_id, $tag) {
 /**
  * Implementation of vud hook_template_suggestions().
  */
-function vud_term_template_suggestions($template_type, $plugin, $content_id) {
-  $term = taxonomy_get_term($content_id);
+function vud_term_template_suggestions($template_type, $plugin, $entity_id) {
+  $term = taxonomy_get_term($entity_id);
   return array(
     $template_type,
     $template_type . '_term',

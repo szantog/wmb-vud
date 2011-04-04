@@ -121,11 +121,11 @@ function vud_permission() {
     'administer vote up/down' => array(
       'title' => t('Administer Vote Up/Down'),
       'description' => t('Adjust the settings of the Vote Up/Down module'),
-    ), 
+    ),
     'access vote up/down statistics' => array(
       'title' => t('Access Vote Up/Down Statistics'),
       'description' => t('Permission to see who is voting on what'),
-    ), 
+    ),
     'reset vote up/down votes' => array(
       'title' => t('Reset Votes'),
       'description' => t('Reset all of the Up/Down votes on the site'),
@@ -145,8 +145,8 @@ function vud_user_votes() {
         array('data' => t('Date'))
       );
       $sql = db_rewrite_sql("SELECT n.nid, n.title, v.value, v.timestamp FROM {node} n LEFT JOIN {votingapi_vote} v
-                             ON n.nid = v.content_id
-                             WHERE v.uid = %d AND v.tag = '%s' AND v.content_type = 'node' AND n.status = 1
+                             ON n.nid = v.entity_id
+                             WHERE v.uid = %d AND v.tag = '%s' AND v.entity_type = 'node' AND n.status = 1
                              ORDER BY v.timestamp DESC");
       $result = pager_query($sql, 25, 0, NULL, $account->uid, variable_get('vud_tag', 'vote'));
       $rows = array();
@@ -175,24 +175,24 @@ function vud_user_votes() {
 /**
  * Callback to reset votes on an object.
  */
-function vud_reset($type, $content_id, $tag, $token) {
-  if (drupal_valid_token($token, "votereset/$type/$content_id/$tag", TRUE)) {
+function vud_reset($type, $entity_id, $tag, $token) {
+  if (drupal_valid_token($token, "votereset/$type/$entity_id/$tag", TRUE)) {
     $uid = votingapi_current_user_identifier();
     $criteria = array(
-      'content_type' => $type,
-      'content_id' => $content_id,
+      'entity_type' => $type,
+      'entity_id' => $entity_id,
       'tag' => $tag,
     );
     $fullc = $criteria + $uid;
     votingapi_delete_votes(votingapi_select_votes($fullc));
-    votingapi_recalculate_results($type, $content_id);
+    votingapi_recalculate_results($type, $entity_id);
 
     drupal_goto($_SERVER['HTTP_REFERER']);
   }
   else {
     watchdog('vud',
-      'Could not reset votes on @type @content_id, with value @value, tag @tag and token @token',
-      array('@type' => $type, '@content_id' => $content_id, '@value' => $value, '@tag' => $tag, '@token' => $token));
+      'Could not reset votes on @type @entity_id, with value @value, tag @tag and token @token',
+      array('@type' => $type, '@entity_id' => $entity_id, '@value' => $value, '@tag' => $tag, '@token' => $token));
     drupal_set_message(t("Oops! There was an error in resetting your vote!", 'warning'));
   }
 }
@@ -231,13 +231,13 @@ function vud_ctools_plugin_directory($module, $plugin) {
  *
  * Add positive/negative aggregations for VotingAPI cache points.
  */
-function vud_votingapi_results_alter(&$cache, $content_type, $content_id) {
+function vud_votingapi_results_alter(&$cache, $entity_type, $entity_id) {
   // positive points
   $sql  = "SELECT SUM(v.value) as value_positives, v.tag ";
   $sql .= "FROM {votingapi_vote} v ";
-  $sql .= "WHERE v.content_type = '%s' AND v.content_id = %d AND v.value_type = 'points' AND v.value > 0 ";
+  $sql .= "WHERE v.entity_type = '%s' AND v.entity_id = %d AND v.value_type = 'points' AND v.value > 0 ";
   $sql .= "GROUP BY v.value_type, v.tag";
-  $result = db_query($sql, $content_type, $content_id);
+  $result = db_query($sql, $entity_type, $entity_id);
   while ($record = db_fetch_object($result)) {
     $cache[$record->tag]['points']['positives'] = $record->value_positives;
   }
@@ -245,9 +245,9 @@ function vud_votingapi_results_alter(&$cache, $content_type, $content_id) {
   // negative points
   $sql  = "SELECT SUM(v.value) as value_negatives, v.tag ";
   $sql .= "FROM {votingapi_vote} v ";
-  $sql .= "WHERE v.content_type = '%s' AND v.content_id = %d AND v.value_type = 'points' AND v.value < 0 ";
+  $sql .= "WHERE v.entity_type = '%s' AND v.entity_id = %d AND v.value_type = 'points' AND v.value < 0 ";
   $sql .= "GROUP BY v.value_type, v.tag";
-  $result = db_query($sql, $content_type, $content_id);
+  $result = db_query($sql, $entity_type, $entity_id);
   while ($record = db_fetch_object($result)) {
     $cache[$record->tag]['points']['negatives'] = $record->value_negatives;
   }

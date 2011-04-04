@@ -208,8 +208,8 @@ function vud_node_node_view($node, $view_mode, $langcode) {
 /**
  * Implementation of vud hook_template_suggestions().
  */
-function vud_node_template_suggestions($template_type, $plugin, $content_id) {
-  $node = node_load($content_id);
+function vud_node_template_suggestions($template_type, $plugin, $entity_id) {
+  $node = node_load($entity_id);
   return array(
     $template_type,
     $template_type . '_node',
@@ -229,7 +229,7 @@ function vud_node_tracker() {
       array('data' => t('Date'))
     );
     $tag = variable_get('vud_tag', 'vote');
-    $criteria = array('content_type' => 'node', 'content_id' => $node->nid, 'tag' => $tag);
+    $criteria = array('entity_type' => 'node', 'entity_id' => $node->nid, 'tag' => $tag);
     $votes = votingapi_select_votes($criteria);
     $rows[] = array();
     foreach ($votes as $vote) {
@@ -295,8 +295,8 @@ function vud_node_link($type, $object, $teaser = FALSE) {
       if ($node_type && variable_get('vud_node_reset', 0) && user_access('reset vote up/down votes')) {
         $tag = variable_get('vud_tag', 'vote');
         $criteria = array(
-          'content_type' => $type,
-          'content_id' => $node->nid,
+          'entity_type' => $type,
+          'entity_id' => $node->nid,
           'tag' => $tag,
         );
         $criteria += votingapi_current_user_identifier();
