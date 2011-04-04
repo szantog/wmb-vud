@@ -132,7 +132,7 @@ function vud_pseudo_theming($vote_entity, $template_type, $plugin, &$variables) 
   }
 
   // TODO: Remove hardcode.
-  $template_file = drupal_get_path('module', 'vud') . '/widgets/plain/widget.tpl.php';
+  $template_file = drupal_get_path('module', 'vud') . '/widgets/' . $plugin['name'] . '/widget.tpl.php';
 
   return $template_file;
 }
