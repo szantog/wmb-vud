@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_views_data_alter().
+ * Implements hook_views_data_alter().
  */
 function vud_comment_views_data_alter(&$data) {
   $data['comments']['vud_comment_widget'] = array(
@@ -22,7 +22,7 @@ function vud_comment_views_data_alter(&$data) {
 
 
 /**
- * Implementation of hook_views_handlers().
+ * Implements hook_views_handlers().
  */
 function vud_comment_views_handlers() {
   return array(
