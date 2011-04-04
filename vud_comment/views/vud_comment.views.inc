@@ -9,7 +9,7 @@
  * Implements hook_views_data_alter().
  */
 function vud_comment_views_data_alter(&$data) {
-  $data['comments']['vud_comment_widget'] = array(
+  $data['comment']['vud_comment_widget'] = array(
     'group' => t('Vote Up/Down'),
     'title' => t('Comment Widget'),
     'help' => t('Provide a comment widget for the Vote up/Down module.'),
