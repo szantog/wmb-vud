@@ -217,12 +217,15 @@ function vud_denied_vote($js = FALSE, $code=VUD_WIDGET_MESSAGE_ERROR) {
 }
 
 /**
- * Implementation of hook_ctools_plugin_dierctory() to let the system know
- * we implement widget plugins.
+ * Implements hook_ctools_plugin_directory().
  */
-function vud_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'vud') {
-    return $plugin;
+function vud_ctools_plugin_directory($module, $type) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', VUD_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+  if ($module == 'vud' && $type == 'widgets') {
+    return 'widgets';
   }
 }
 

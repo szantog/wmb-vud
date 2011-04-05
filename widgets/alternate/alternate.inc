@@ -6,11 +6,9 @@
  */
 
 /**
- * Implementation of hook_vud_widgets(). (Specialized)
+ * Plugin decleration.
  */
-function vud_alternate_vud_widgets() {
-  return array(
-    'title' => t('Alternate'),
-    'widget template' => 'widget',
-  );
-}
+$plugin = array(
+  'title' => t('Alternate'),
+  'widget template' => 'widget',
+);

@@ -11,20 +11,6 @@ define('VUD_WIDGET_MESSAGE_DENIED', 1);
 define('VUD_REQUIRED_CTOOLS_API', '2.0-alpha');
 
 /**
- * Implements hook_ctools_plugin_directory().
- */
-function og_migrate_ctools_plugin_directory($module, $type) {
-  // Safety: go away if CTools is not at an appropriate version.
-  if (!module_invoke('ctools', 'api_version', VUD_REQUIRED_CTOOLS_API)) {
-    return;
-  }
-  if ($module == 'vud' && $type == 'widgets') {
-    return 'plugins/widgets';
-  }
-}
-
-
-/**
  * Implements hook_ctools_plugin_type().
  */
 function vud_ctools_plugin_type() {
@@ -132,7 +118,7 @@ function vud_pseudo_theming($vote_entity, $template_type, $plugin, &$variables) 
   }
 
   // TODO: Remove hardcode.
-  $template_file = drupal_get_path('module', 'vud') . '/widgets/' . $plugin['name'] . '/widget.tpl.php';
+  $template_file = drupal_get_path('module', $plugin['plugin module']) . '/widgets/' . $plugin['name'] . '/widget.tpl.php';
 
   return $template_file;
 }
@@ -397,27 +383,38 @@ function vud_vote($type, $entity_id, $value, $tag, $widget, $token) {
     drupal_set_message(t("Oops! There was an error in submitting your vote!"), 'warning');
   }
 
-  if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
-    ctools_include('ajax');
+  // if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
+  if (TRUE) {
     $plugin = vud_widget_get($widget);
+    $commands = array();
 
     if ($function = ctools_plugin_get_function($plugin, 'ajax render')) {
       $commands = $function($type, $entity_id, $value, $tag, $token, $widget);
     }
     else {
-      $commands = array();
-      if (!empty($plugin['widget template'])) {
-        $commands[] = ctools_ajax_command_replace("#widget-$type-$entity_id", theme('vud_widget', $entity_id, $type, $tag, $widget));
+        if (!empty($plugin['widget template'])) {
+        $variables = array(
+          'entity_id' =>$entity_id,
+          'type' => $type,
+          'tag' => $tag,
+          'widget_theme' => $widget,
+        );
+        $commands[] = ajax_command_replace("#widget-$type-$entity_id", theme('vud_widget', theme('vud_widget', $variables)));
       }
 
       if (!empty($plugin['votes template'])) {
-        $commands[] = ctools_ajax_command_replace("#votes-$type-$entity_id", theme('vud_votes', $entity_id, $type, $tag, $widget));
+        $variables = array(
+          'entity_id' =>$entity_id,
+          'type' => $type,
+          'tag' => $tag,
+          'widget_theme' => $widget,
+        );
+        $commands[] = ajax_command_replace("#votes-$type-$entity_id", theme('vud_votes', $variables));
       }
     }
 
-    // This is the default set of commands. It can be overridden by an individual
-    // widget if it wants to.
-    ctools_ajax_render($commands);
+    print ajax_render($commands);
+    exit;
   }
   else {
     drupal_goto($_SERVER['HTTP_REFERER']);

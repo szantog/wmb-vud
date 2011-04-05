@@ -6,16 +6,17 @@
  */
 
 /**
- * Implementation of hook_vud_widgets(). (Specialized)
+ * Plugin decleration.
  */
-function vud_upanddown_vud_widgets() {
-  return array(
-    'title' => t('Up and down'),
-    'widget template' => 'widget',
-    'alter template variables' => 'vud_widget_upanddown_alter_template_vars',
-  );
-}
+$plugin = array(
+  'title' => t('Up and down'),
+  'widget template' => 'widget',
+  'alter template variables' => 'vud_widget_upanddown_alter_template_vars',
+);
 
+/**
+ * Alter template variables.
+ */
 function vud_widget_upanddown_alter_template_vars($template_type, &$variables) {
   $criteria = array(
     'entity_type' => $variables['type'],
