@@ -383,8 +383,7 @@ function vud_vote($type, $entity_id, $value, $tag, $widget, $token) {
     drupal_set_message(t("Oops! There was an error in submitting your vote!"), 'warning');
   }
 
-  // if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
-  if (TRUE) {
+  if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
     $plugin = vud_widget_get($widget);
     $commands = array();
 
