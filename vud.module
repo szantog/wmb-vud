@@ -33,7 +33,8 @@ function vud_menu() {
     'title'            => 'Vote',
     'page callback'    => 'vud_vote',
     'page arguments'   => array(1, 2, 3, 4, 5, 6),
-    'access arguments' => array('use vote up/down'),
+    'access callback'  => 'vud_access_callback',
+    'access arguments' => array('use vote up/down', 1, 2, 3, 4),
     'type'             => MENU_CALLBACK,
     'file'             => 'vud.theme.inc',
   );
@@ -42,7 +43,8 @@ function vud_menu() {
     'title'            => 'Reset vote',
     'page callback'    => 'vud_reset',
     'page arguments'   => array(1, 2, 3, 4),
-    'access arguments' => array('reset vote up/down votes'),
+    'access callback'  => 'vud_access_callback',
+    'access arguments' => array('reset vote up/down votes', 1, 2, 3, 4),
     'type'             => MENU_CALLBACK,
   );
 
@@ -94,6 +96,50 @@ function vud_admin_advanced_settings() {
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Access callback for votes.
+ *
+ * @param $perm
+ *   A string containing the permission required to modify the vote.
+ * @param $entity_type
+ *   A string containing the type of content being voted on.
+ * @param $entity_id
+ *   An integer containing the unique ID of the content being voted on.
+ * @param $value
+ *   An integer containing the vote value, 1 for an up vote, -1 for a down vote.
+ * @param $tag
+ *   A string containing the voting API tag.
+ * $param $account
+ *   An object containing the user voting on the content, NULL for the current
+ *   user.
+ *
+ * @return
+ *   A boolean flagging whether or not the user has access to the vote.
+ */
+function vud_access_callback($perm, $entity_type, $entity_id, $value, $tag, $account = NULL) {
+  if ($account === NULL) {
+    global $user;
+    $account = $user;
+  }
+
+  // If user do not pass system permissions, deny soon.
+  if (user_access($perm, $account) !== TRUE) {
+    return FALSE;
+  }
+
+  // Invokes hook_vud_access(), gives modules ability to allow or disallow access.
+  $access_array = module_invoke_all('vud_access', $perm, $entity_type, $entity_id, $value, $tag, $account);
+  foreach ($access_array as $access_result) {
+    // If one hook implementation want to deny, end there.
+    if ($access_result !== TRUE) {
+      return FALSE;
+    }
+  }
+
+  // If we are here, account should pass.
+  return TRUE;
 }
 
 /**

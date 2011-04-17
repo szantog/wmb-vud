@@ -11,6 +11,34 @@
 define('VUD_NEWENTITY_WIDGET_MESSAGE_POSTPONED', 2);
 
 /**
+ * Allow modules to alter access to the voting operation.
+ *
+ * @param $perm
+ *   A string containing the permission required to modify the vote.
+ * @param $entity_type
+ *   A string containing the type of content being voted on.
+ * @param $entity_id
+ *   An integer containing the unique ID of the content being voted on.
+ * @param $value
+ *   An integer containing the vote value, 1 for an up vote, -1 for a down vote.
+ * @param $tag
+ *   A string containing the voting API tag.
+ * $param $account
+ *   An object containing the user voting on the content, NULL for the current
+ *   user.
+ *
+ * @return
+ *   A boolean forcing access to the vote, pass NULL if the function should
+ *   not modify the access restriction.
+ */
+function hook_vud_access($perm, $entity_type, $entity_id, $value, $tag, $account) {
+  // Denies access for all users other than user 1.
+  if ($account->uid != 1) {
+    return FALSE;
+  }
+}
+
+/**
  * Modify the array of know messages.
  *
  * For a real implementation take a look at
