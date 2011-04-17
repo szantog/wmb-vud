@@ -208,7 +208,7 @@ function vud_widget_proxy($content_id, $type, $tag, $widget_theme, $readonly=NUL
       $variables['class'] = 'neutral';
     }
   }
-  $variables['vote_label'] = format_plural($vote_result, 'vote', 'votes');
+  $variables['vote_label'] = format_plural(abs($vote_result), 'vote', 'votes');
 
   $variables['readonly'] = $readonly;
   $link_up = url("vote/$type/$content_id/1/$tag/$widget_theme/$token_up");
@@ -291,7 +291,7 @@ function vud_votes_proxy($content_id, $type, $tag, $widget_theme) {
       $variables['class'] = 'neutral';
     }
   }
-  $variables['vote_label'] = format_plural($vote_result, 'vote', 'votes');
+  $variables['vote_label'] = format_plural(abs($vote_result), 'vote', 'votes');
 
   vud_add_files('css', $plugin);  // Search and add the CSS files.
   vud_add_files('js', $plugin);   // Search and add the JS files.
