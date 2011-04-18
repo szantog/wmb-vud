@@ -172,7 +172,7 @@ number of votes.
 `$unsigned_points` :: Number of total vote points for the object
     (unsigned).
 `$up_points`	     :: Number of total positive vote points for the vote object. Only available for upanddown widget.
-`$down_points`	   :: Number of total positive vote points for the vote object. Only available for upanddown widget.
+`$down_points`	   :: Number of total negative vote points for the vote object. Only available for upanddown widget.
 `$vote_count`	     :: Number of total votes for the vote object.
 `$readonly`        :: Boolean that indicates if the actual user can vote
     on the object where the widget is displayed.
