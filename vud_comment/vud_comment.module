@@ -35,6 +35,9 @@ function vud_comment_permission() {
     'use vote up/down on comments' => array(
       'title' => t('Vote on Comments'),
     ),
+    'view vote up/down count on comments' => array(
+      'title' => t('View Vote Count on comments'),
+    )
   );
 }
 
@@ -116,7 +119,8 @@ function vud_comment_comment_view($comment, $view_mode, $langcode) {
 
   $type = _vud_comment_get_node_type($comment->nid);
   $comment_allow = in_array($type, variable_get('vud_comment_node_types', array()), TRUE);
-  if ($comment_allow && user_access('use vote up/down on comments')) {
+  $can_edit = user_access('use vote up/down on comments');
+  if ($comment_allow && ($can_edit || user_access('view vote up/down count on comments'))) {
     $tag = variable_get('vud_tag', 'vote');
     $widget_theme = variable_get('vud_comment_widget', 'plain');
 
@@ -125,6 +129,7 @@ function vud_comment_comment_view($comment, $view_mode, $langcode) {
       'type' => 'comment',
       'tag' => $tag,
       'widget_theme' => $widget_theme,
+      'readonly' => !$can_edit,
     );
     $comment->vud_comment_widget = theme('vud_widget', $variables);
     if (variable_get('vud_comment_widget_display', VUD_COMMENT_DISPLAY_NORMAL) == VUD_COMMENT_DISPLAY_NORMAL) {

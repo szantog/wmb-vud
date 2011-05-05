@@ -235,6 +235,8 @@ function vud_widget_proxy($variables) {
       ctools_modal_add_js();
       $variables['link_class_up'] .= ' ctools-use-modal';
       $variables['link_class_down'] .= ' ctools-use-modal';
+      // FIXME: Where should $widget_message_code come from?
+      $widget_message_code = VUD_WIDGET_MESSAGE_DENIED;
       $link_up = url(sprintf('vud/nojs/denied/%d', $widget_message_code));
       $link_down = url(sprintf('vud/nojs/denied/%d', $widget_message_code));
     }
