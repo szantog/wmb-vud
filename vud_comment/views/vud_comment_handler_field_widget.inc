@@ -30,7 +30,8 @@ class vud_comment_handler_field_widget extends views_handler_field {
     $query = 'SELECT n.type FROM {comment} c LEFT JOIN {node} n ON c.nid = n.nid WHERE c.cid = :cid';
     $type = db_query($query, array(':cid' => $values->cid))->fetchField();
     $comment_allow = in_array($type, variable_get('vud_comment_node_types', array()), TRUE);
-    if ($comment_allow && user_access('use vote up/down on comments')) {
+    $can_edit = user_access('use vote up/down on comments');
+    if ($comment_allow && ($can_edit || user_access('view vote up/down count on comments'))) {
       $tag = variable_get('vud_tag', 'vote');
       $widget_theme = variable_get('vud_comment_widget', 'plain');
 
@@ -39,6 +40,7 @@ class vud_comment_handler_field_widget extends views_handler_field {
         'type' => 'comment',
         'tag' => $tag,
         'widget_theme' => $widget_theme,
+        'readonly' => !$can_edit,
       );
       $widget = theme('vud_widget', $variables);
     }
