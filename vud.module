@@ -65,20 +65,6 @@ function vud_menu() {
 }
 
 /**
- * Implementation of hook_init().
- */
-function vud_init() {
-  // Remove anonymous sessions which were previously set to prevent pressflow
-  // page caching. This will eventually clean up those sessions over time.
-  // @todo: remove in a future release when it can be reasonably expected that
-  // no more sessions with this variable exist in the wild.
-  $now = time();
-  if (!empty($_SESSION['vud_timestamp'])) {
-    unset($_SESSION['vud_timestamp']);
-  }
-}
-
-/**
  * Implementation of hook_help().
  */
 function vud_help($path, $arg) {
