@@ -5,7 +5,8 @@
  * Implements the core voting module on top of Voting API.
  */
 
-module_load_include('inc', 'vud', 'vud.theme');  // Include the theme.inc file.
+// Include the theme.inc file.
+module_load_include('inc', 'vud', 'vud.theme');
 
 /**
  * Implementation of hook_menu().
