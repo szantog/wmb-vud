@@ -127,10 +127,31 @@ function vud_pseudo_theming($vote_entity, $template_type, $plugin, &$variables) 
  * Proxy widget function that hook_theme() calls.
  */
 function vud_widget_proxy($variables) {
+  global $user;
   $plugin = vud_widget_get($variables['widget_theme']);
   if (empty($plugin) || empty($plugin['widget template'])) {
     return;
   }
+
+  $variables += array(
+    'widget_message_code' => VUD_WIDGET_MESSAGE_ERROR,
+    'readonly' => FALSE,
+    'plugin' => $plugin,
+    'tag' => variable_get('vud_tag', 'vote'),
+    'id' => 'widget-' . $variables['type'] . '-' . $variables['entity_id'],
+    'link_class_up' => 'vud-link-up',
+    'link_class_down' => 'vud-link-down',
+
+    'link_up' => '',
+    'link_down' => '',
+
+    'class_up' => 'up-active',
+    'class_down' => 'down-active',
+
+    'show_links' => FALSE,
+    'show_up_as_link' => FALSE,
+    'show_down_as_link' => FALSE,
+  );
 
   $type = $variables['type'];
   $entity_id = $variables['entity_id'];
@@ -138,50 +159,96 @@ function vud_widget_proxy($variables) {
   $widget_theme = $variables['widget_theme'];
   $readonly = $variables['readonly'];
 
-  $variables += array(
-    'widget_message_code' => VUD_WIDGET_MESSAGE_ERROR,
-    'readonly' => NULL,
-    'plugin' => $plugin,
-    'tag' => variable_get('vud_tag', 'vote'),
-    'id' => 'widget-' . $type . '-' . $entity_id,
-    'link_class_up' => 'vud-link-up',
-    'link_class_down' => 'vud-link-down',
-  );
-
-  global $user;
-  $uid = votingapi_current_user_identifier();
-
   ctools_add_js('ajax-responder');
   ctools_include('ajax');
+  // TODO: Move this to vud-comment.
   if ($type == 'comment') {
     drupal_add_css(drupal_get_path('module', 'vud_comment') . '/vud_comment.css');
   }
-  vud_add_files('css', $plugin);  // Search and add the CSS files.
-  vud_add_files('js', $plugin);   // Search and add the JS files.
 
-  $base_criteria = array(
-    'entity_type' => $type,
-    'entity_id' => $entity_id,
-    'tag' => $variables['tag'],
-  );
-  $criteria = $base_criteria + $uid;
-  $user_vote = user_access('use vote up/down') ? votingapi_select_single_vote_value($criteria) : 0;
+  // Search and add media files.
+  vud_add_files('css', $plugin);
+  vud_add_files('js', $plugin);
 
-  if ($user_vote > 0) {
-    $variables['class_up'] = 'up-active';
-    $variables['class_down'] = 'down-inactive';
+  $user_vote =  0;
+
+  // Define access per operation, for example when the vote up operation is
+  // active this means the down operation should be allowed, as the up vote was
+  // already.
+  $up_access = $down_access = FALSE;
+  if (user_access('use vote up/down')) {
+    $criteria = array(
+      'entity_type' => $type,
+      'entity_id' => $entity_id,
+      'tag' => $variables['tag'],
+    ) + votingapi_current_user_identifier();
+    $previous_vote = votingapi_select_single_vote_value($criteria);
+
+    $user_vote = isset($previous_vote) ? $previous_vote : 0;
+
+    if (!$readonly) {
+
+      $up_access = $user_vote <= 0;
+      $down_access = $user_vote >= 0;
+
+      if (!$up_access && !$down_access) {
+        // Although implementing modules have requested a not readonly widget,
+        // we prevent access.
+        $readonly = $variables['readonly'] = TRUE;
+      }
+    }
   }
-  elseif ($user_vote < 0) {
-    $variables['class_up'] = 'up-inactive';
-    $variables['class_down'] = 'down-active';
+
+  // Prepare links only if it's not readonly, or if readonly but we need to show
+  // a messgae on deny.
+  $message_on_deny = variable_get('vud_message_on_deny', FALSE);
+  if (!$readonly || ($readonly && $message_on_deny)) {
+    // Widget needs to show links.
+    if ($up_access) {
+      $variables['class_up'] = 'up-inactive';
+      $variables['show_up_as_link'] = TRUE;
+    }
+    if ($down_access) {
+      $variables['class_down'] = 'down-inactive';
+      $variables['show_down_as_link'] = TRUE;
+    }
+    $variables['show_links'] = TRUE;
+  }
+
+  if (!$readonly) {
+    // Widget has link(s).
+    if ($up_access) {
+      $token_up = drupal_get_token("vote/$type/$entity_id/1/$tag/$widget_theme");
+      $variables['link_up'] = url("vote/$type/$entity_id/1/$tag/$widget_theme/$token_up/nojs");
+      $variables['link_class_up'] .= ' use-ajax';
+    }
+    if ($down_access) {
+      $token_down = drupal_get_token("vote/$type/$entity_id/-1/$tag/$widget_theme");
+      $variables['link_down'] = url("vote/$type/$entity_id/-1/$tag/$widget_theme/$token_down/nojs");
+      $variables['link_class_down'] .= ' use-ajax';
+    }
+  }
+  elseif ($readonly && $message_on_deny) {
+    // Readonly widget, but with a deny messgae.
+    ctools_include('modal');
+    ctools_modal_add_js();
+    if ($up_access) {
+      $variables['link_class_up'] .= ' denied ctools-use-modal';
+    }
+    else {
+      $variables['link_class_down'] .= ' denied ctools-use-modal';
+    }
+
+    // TODO: Get default $widget_message_code or one from $variables.
+    $widget_message_code = VUD_WIDGET_MESSAGE_DENIED;
+    $variables['link_up'] = url(sprintf('vud/nojs/denied/%d', $widget_message_code));
+    $variables['link_down'] = url(sprintf('vud/nojs/denied/%d', $widget_message_code));
   }
   else {
-    $variables['class_up'] = 'up-inactive';
-    $variables['class_down'] = 'down-inactive';
+    // Readonly widget.
+    $variables['link_up'] = '#';
+    $variables['link_down'] = '#';
   }
-
-  $token_up = drupal_get_token("vote/$type/$entity_id/1/$tag/$widget_theme");
-  $token_down = drupal_get_token("vote/$type/$entity_id/-1/$tag/$widget_theme");
 
   $result_criteria = array(
     'entity_type' => $type,
@@ -220,39 +287,6 @@ function vud_widget_proxy($variables) {
     }
   }
   $variables['vote_label'] = format_plural(abs($vote_result), 'vote', 'votes');
-
-  $link_up = url("vote/$type/$entity_id/1/$tag/$widget_theme/$token_up");
-  $link_down = url("vote/$type/$entity_id/-1/$tag/$widget_theme/$token_down");
-  $message_on_deny = variable_get('vud_message_on_deny', FALSE);
-  $variables['show_links'] = !$readonly || $message_on_deny;
-  $variables['show_up_as_link'] = $variables['show_links'] && ($user_vote <= 0);
-  $variables['show_down_as_link'] = $variables['show_links'] && ($user_vote >= 0);
-  if ($readonly) {
-    $variables['link_class_up'] .= ' denied';
-    $variables['link_class_down'] .= ' denied';
-    if ($message_on_deny) {
-      ctools_include('modal');
-      ctools_modal_add_js();
-      $variables['link_class_up'] .= ' ctools-use-modal';
-      $variables['link_class_down'] .= ' ctools-use-modal';
-      // FIXME: Where should $widget_message_code come from?
-      $widget_message_code = VUD_WIDGET_MESSAGE_DENIED;
-      $link_up = url(sprintf('vud/nojs/denied/%d', $widget_message_code));
-      $link_down = url(sprintf('vud/nojs/denied/%d', $widget_message_code));
-    }
-    else {
-      // no vote access, so avoid show the link at template
-      $link_up = '#';
-      $link_down = '#';
-    }
-  }
-  else {
-    $variables['link_class_up'] .= ' ctools-use-ajax';
-    $variables['link_class_down'] .= ' ctools-use-ajax';
-  }
-
-  $variables['link_up'] = $link_up;
-  $variables['link_down'] = $link_down;
 
   $template_file = vud_pseudo_theming($type, 'widget', $plugin, $variables);
   return $plugin['render function']($template_file, $variables);
@@ -339,53 +373,45 @@ function vud_add_files($type, $plugin) {
 /**
  * Function for the main voting handler with Ajax support.
  */
-function vud_vote($type, $entity_id, $value, $tag, $widget, $token) {
-  if (is_numeric($value) && drupal_valid_token($token, "vote/$type/$entity_id/$value/$tag/$widget", TRUE)) {
-    $vote = array();
-
-    $casted_vote_criteria = array(
-      'entity_type' => $type,
-      'entity_id' => $entity_id,
-      'tag' => $tag,
-    ) + votingapi_current_user_identifier();
-    $casted_vote = votingapi_select_single_vote_value($casted_vote_criteria);
-
-    // Sanity-check the incoming values.
-    if ($value > 0) {
-        $value = 1;
-    }
-    elseif ($value < 0) {
-      $value = -1;
-    }
-    else {
-      $value = FALSE;
-    }
-
-    // Do not allow vote with the same value
-    if ( ($casted_vote > 0 && $value > 0) || ($casted_vote < 0 && $value < 0) ) {
-      $value = FALSE;
-    }
-
-    if ($value !== FALSE) {
-      $vote['value'] = $value;
-      $vote['value_type'] = 'points';
-      $tag = $tag ? $tag : variable_get('vud_tag', 'vote');
-      $vote['tag'] = $tag;
-      $vote['entity_id'] = $entity_id;
-      $vote['entity_type'] = $type;
-      $votes = array(0 => $vote);
-      drupal_alter('vud_votes', $votes);
-      votingapi_set_votes($votes);
-    }
-  }
-  else {
-    watchdog('vud',
-      'Could not vote on @type @entity_id, with value @value, tag @tag and token @token',
-      array('@type' => $type, '@entity_id' => $entity_id, '@value' => $value, '@tag' => $tag, '@token' => $token));
-    drupal_set_message(t("Oops! There was an error in submitting your vote!"), 'warning');
+function vud_vote($type, $entity_id, $value, $tag, $widget, $token, $ajax = 'ajax') {
+  // If the user is anonymous we don't need to check for a token.
+  if (!is_numeric($value) || !drupal_valid_token($token, "vote/$type/$entity_id/$value/$tag/$widget", TRUE)) {
+    return MENU_ACCESS_DENIED;
   }
 
-  if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest') {
+  $vote = array();
+  $casted_vote_criteria = array(
+    'entity_type' => $type,
+    'entity_id' => $entity_id,
+    'tag' => $tag,
+  ) + votingapi_current_user_identifier();
+  $casted_vote = votingapi_select_single_vote_value($casted_vote_criteria);
+
+  // Sanity-check the incoming values.
+  if ($value > 0) {
+    $value = 1;
+  }
+  elseif ($value < 0) {
+    $value = -1;
+  }
+
+
+  if ($value == 0 || ($casted_vote > 0 && $value > 0) || ($casted_vote < 0 && $value < 0)) {
+    // Do not allow vote with the same value.
+    return;
+  }
+
+  $vote['value'] = $value;
+  $vote['value_type'] = 'points';
+  $tag = $tag ? $tag : variable_get('vud_tag', 'vote');
+  $vote['tag'] = $tag;
+  $vote['entity_id'] = $entity_id;
+  $vote['entity_type'] = $type;
+  $votes = array(0 => $vote);
+  drupal_alter('vud_votes', $votes);
+  votingapi_set_votes($votes);
+
+  if ($ajax == 'ajax') {
     $plugin = vud_widget_get($widget);
     $commands = array();
 
@@ -393,23 +419,17 @@ function vud_vote($type, $entity_id, $value, $tag, $widget, $token) {
       $commands = $function($type, $entity_id, $value, $tag, $token, $widget);
     }
     else {
-        if (!empty($plugin['widget template'])) {
-        $variables = array(
-          'entity_id' =>$entity_id,
-          'type' => $type,
-          'tag' => $tag,
-          'widget_theme' => $widget,
-        );
-        $commands[] = ajax_command_replace("#widget-$type-$entity_id", theme('vud_widget', theme('vud_widget', $variables)));
+      $variables = array(
+        'entity_id' =>$entity_id,
+        'type' => $type,
+        'tag' => $tag,
+        'widget_theme' => $widget,
+      );
+      if (!empty($plugin['widget template'])) {
+        $commands[] = ajax_command_replace("#widget-$type-$entity_id", theme('vud_widget', $variables));
       }
 
       if (!empty($plugin['votes template'])) {
-        $variables = array(
-          'entity_id' =>$entity_id,
-          'type' => $type,
-          'tag' => $tag,
-          'widget_theme' => $widget,
-        );
         $commands[] = ajax_command_replace("#votes-$type-$entity_id", theme('vud_votes', $variables));
       }
     }
