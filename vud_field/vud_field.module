@@ -74,11 +74,17 @@ function vud_field_field_widget_info() {
  * Implements hook_field_widget_form().
  */
 function vud_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $element += array(
-    '#type' => 'value',
-    '#value' => _vud_field_load($field, $items[$delta], $instance),
-  );
-  return $element;
+  $item = isset($items[$delta]) ? $items[$delta] : NULL;
+  $item = _vud_field_load($field, $item, $instance);
+  $keys = array('vud_widget', 'votingapi_tag');
+  $form_elements = array();
+  foreach ($keys as $key) {
+    $form_elements[$key] = $element + array(
+      '#type' => 'value',
+      '#value' => $item[$key],
+    );
+  }
+  return $form_elements;
 }
 
 /**
