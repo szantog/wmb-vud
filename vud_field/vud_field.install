@@ -16,6 +16,12 @@ function vud_field_field_schema($field) {
         'not null' => FALSE,
         'sortable' => TRUE
       ),
+      'votingapi_tag' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => 'vote',
+      ),
     ),
   );
 }

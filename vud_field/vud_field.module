@@ -15,9 +15,11 @@ function vud_field_field_info() {
       'description' => t('A voting widget.'),
       'settings' => array(
         'vud_widget' => 'updown',
+        'votingapi_tag' => 'vote',
       ),
       'instance_settings' => array(
         'vud_widget' => 'updown',
+        'votingapi_tag' => 'vote',
       ),
       'default_widget' => 'vud_field_default_widget',
       'default_formatter' => 'default',
@@ -39,6 +41,12 @@ function vud_field_field_instance_settings_form($field, $instance) {
     '#description'   => t('Select the voting widget that will be displayed for this field.'),
     '#required' => TRUE,
   );
+  $form['votingapi_tag'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Voting API tag'),
+    '#default_value' => isset($instance['settings']['votingapi_tag']) ? $instance['settings']['votingapi_tag'] : variable_get('vud_tag', 'vote'),
+    '#description'   => t('The Voting API tag that votes will be tagged with.'),
+  );
 
   return $form;
 }
@@ -47,13 +55,13 @@ function vud_field_field_instance_settings_form($field, $instance) {
  * Implement hook_field_is_empty().
  */
 function vud_field_field_is_empty($item, $field) {
-  return empty($item['vud_widget']);
+  return empty($item['vud_widget']) || empty($item['votingapi_tag']);
 }
 
 /**
  * Implements hook_field_load().
  */
-function vud_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
+function vud_field_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
       $items[$id][$delta] = _vud_field_load($field, $item, $instances[$id]);
@@ -78,29 +86,31 @@ function vud_field_widget_info() {
  * Implements hook_field_widget_form().
  */
 function vud_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $default_value = array(
-    'vud_widget' => 'updown',
-  );
   $element += array(
     '#type' => 'value',
-    '#value' => isset($items[$delta]) ? $items[$delta] : !empty($instance['settings']) ? $instance['settings'] : $default_value,
+    '#value' => _vud_field_load($field, $items[$delta], $instance),
   );
   return $element;
 }
 
 /**
- * Unpacks the item vud_widget for use.
+ * Get the item to use.
  */
 function _vud_field_load($field, $item, $instance) {
-  if (isset($item['vud_widget'])) {
-    return $item;
+  $keys = array('vud_widget', 'votingapi_tag');
+  $value = array();
+  foreach ($keys as $key) {
+    if (isset($item[$key])) {
+      $value[$key] = $item[$key];
+    }
+    elseif (isset($instance['settings'][$key])) {
+      $value[$key] = $instance['settings'][$key];
+    }
+    else {
+      $value = $instance['settings'][$key];
+    }
   }
-  else if (isset($instance['settings']['vud_widget'])) {
-    return $instance['settings'];
-  }
-  else {
-    return $field['settings'];
-  }
+  return $value;
 }
 
 /**
@@ -155,6 +165,7 @@ function vud_field_field_formatter_view($entity_type, $entity, $field, $instance
   foreach ($items as $delta => $item) {
     $variables = $variables_template;
     $variables['vud_widget_variables']['widget_theme'] = $item['vud_widget'];
+    $variables['vud_widget_variables']['tag'] = $item['votingapi_tag'];
     $elements[$delta] = array(
       '#markup' => theme('vud_field_formatter_'. $display['type'], $variables),
     );
