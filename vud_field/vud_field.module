@@ -72,7 +72,7 @@ function vud_field_field_load($entity_type, $entities, $field, $instances, $lang
 /**
  * Implements hook_field_widget_info().
  */
-function vud_field_widget_info() {
+function vud_field_field_widget_info() {
   return array(
     'vud_field_default_widget' => array(
       'label' => 'Vote Up/Down',
@@ -85,7 +85,7 @@ function vud_field_widget_info() {
 /**
  * Implements hook_field_widget_form().
  */
-function vud_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+function vud_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $element += array(
     '#type' => 'value',
     '#value' => _vud_field_load($field, $items[$delta], $instance),
