@@ -95,7 +95,7 @@ function _vud_field_load($field, $item, $instance) {
       $value[$key] = $instance['settings'][$key];
     }
     else {
-      $value = $instance['settings'][$key];
+      $value[$key] = $field['settings'][$key];
     }
   }
   return $value;
