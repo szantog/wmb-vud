@@ -59,17 +59,6 @@ function vud_field_field_is_empty($item, $field) {
 }
 
 /**
- * Implements hook_field_load().
- */
-function vud_field_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
-  foreach ($entities as $id => $entity) {
-    foreach ($items[$id] as $delta => $item) {
-      $items[$id][$delta] = _vud_field_load($field, $item, $instances[$id]);
-    }
-  }
-}
-
-/**
  * Implements hook_field_widget_info().
  */
 function vud_field_field_widget_info() {
