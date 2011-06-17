@@ -77,7 +77,6 @@ function vud_field_field_widget_info() {
     'vud_field_default_widget' => array(
       'label' => 'Vote Up/Down',
       'field types' => array('vud_field'),
-      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
     ),
   );
 }
@@ -139,7 +138,6 @@ function vud_field_field_formatter_info() {
     'default' => array(
       'label' => t('Vote Up/Down (default)'),
       'field types' => array('vud_field'),
-      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
     ),
   );
 }
