@@ -395,10 +395,10 @@ function vud_vote($type, $entity_id, $value, $tag, $widget, $token, $ajax = 'aja
   elseif ($value < 0) {
     $value = -1;
   }
-
-
-  if ($value == 0 || ($casted_vote > 0 && $value > 0) || ($casted_vote < 0 && $value < 0)) {
-    // Do not allow vote with the same value.
+  else {
+    // Invalid value.
+    watchdog('vud', 'Invalid vote on @type @content_id, with value @value, tag @tag and token @token',
+      array('@type' => $type, '@content_id' => $content_id, '@value' => $value, '@tag' => $tag, '@token' => $token));
     return;
   }
 
@@ -410,6 +410,11 @@ function vud_vote($type, $entity_id, $value, $tag, $widget, $token, $ajax = 'aja
   $vote['entity_type'] = $type;
   $votes = array(0 => $vote);
   drupal_alter('vud_votes', $votes);
+
+  // Do not allow to vote with the same value.
+  if ($casted_vote == $votes[0]['value']) {
+    return;
+  }
   votingapi_set_votes($votes);
 
   if ($ajax == 'ajax') {
