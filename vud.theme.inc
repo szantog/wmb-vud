@@ -159,6 +159,7 @@ function vud_widget_proxy($variables) {
   $widget_theme = $variables['widget_theme'];
   $readonly = $variables['readonly'];
 
+  drupal_add_library('system', 'drupal.ajax');
   ctools_add_js('ajax-responder');
   ctools_include('ajax');
   // TODO: Move this to vud-comment.
