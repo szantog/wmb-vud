@@ -120,8 +120,8 @@ function _vud_term_generate_table(&$node) {
         array('data' => t('Reset')),
       );
       $rows[] = array(
-        $tdetails->name,
-        $tdetails->description,
+        check_plain($tdetails->name),
+        check_plain($tdetails->description),
         theme('vud_widget', $entity_id, "term", $tag, $widget),
         "<span id=\"total-votes-term-$entity_id\">". _vud_term_get_row_votes($entity_id, $tag) .'</span>',
         l('Reset your vote', "votereset/term/$entity_id/$tag/$reset_token"),
@@ -135,8 +135,8 @@ function _vud_term_generate_table(&$node) {
         array('data' => t('Score')),
       );
       $rows[] = array(
-        $tdetails->name,
-        $tdetails->description,
+        check_plain($tdetails->name),
+        check_plain($tdetails->description),
         theme('vud_widget', $entity_id, "term", $tag, $widget),
         "<span id=\"total-votes-term-$entity_id\">". _vud_term_get_row_votes($entity_id, $tag) .'</span>',
       );
