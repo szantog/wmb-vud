@@ -39,13 +39,14 @@ function vud_menu() {
     'file'             => 'vud.theme.inc',
   );
 
-  $items['votereset/%/%/%/%'] = array(
+  $items['votereset/%/%/%/%/%'] = array(
     'title'            => 'Reset vote',
     'page callback'    => 'vud_reset',
-    'page arguments'   => array(1, 2, 3, 4),
+    'page arguments'   => array(1, 2, 3, 4, 5),
     'access callback'  => 'vud_access_callback',
     'access arguments' => array('reset vote up/down votes', 1, 2, 3, 4),
     'type'             => MENU_CALLBACK,
+    'file'             => 'vud.theme.inc',
   );
 
   $items['user/%user/votes'] = array(
@@ -202,31 +203,6 @@ function vud_user_votes() {
   }
   else {
     drupal_not_found();
-  }
-}
-
-/**
- * Callback to reset votes on an object.
- */
-function vud_reset($type, $entity_id, $tag, $token) {
-  if (drupal_valid_token($token, "votereset/$type/$entity_id/$tag", TRUE)) {
-    $uid = votingapi_current_user_identifier();
-    $criteria = array(
-      'entity_type' => $type,
-      'entity_id' => $entity_id,
-      'tag' => $tag,
-    );
-    $fullc = $criteria + $uid;
-    votingapi_delete_votes(votingapi_select_votes($fullc));
-    votingapi_recalculate_results($type, $entity_id);
-
-    drupal_goto($_SERVER['HTTP_REFERER']);
-  }
-  else {
-    watchdog('vud',
-      'Could not reset votes on @type @entity_id, with value @value, tag @tag and token @token',
-      array('@type' => $type, '@entity_id' => $entity_id, '@value' => $value, '@tag' => $tag, '@token' => $token));
-    drupal_set_message(t("Oops! There was an error in resetting your vote!", 'warning'));
   }
 }
 

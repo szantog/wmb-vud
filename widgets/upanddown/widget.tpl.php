@@ -36,4 +36,11 @@
     <?php endif; ?>
     <span class="down-current-score"><?php print $down_points; ?></span>
   </div>
+  <?php if ($show_reset): ?>
+    <a href="<?php print $link_reset; ?>" rel="nofollow" class="<?php print $link_class_reset; ?>" title="<?php print $reset_long_text; ?>">
+      <div class="<?php print $class_reset; ?>">
+        <?php print $reset_short_text; ?>
+      </div>
+    </a>
+  <?php endif; ?>
 </div>

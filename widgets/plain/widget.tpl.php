@@ -24,5 +24,12 @@
     <?php if ($show_down_as_link): ?>
       </a>
     <?php endif; ?>
+    <?php if ($show_reset): ?>
+      <a href="<?php print $link_reset; ?>" rel="nofollow" class="<?php print $link_class_reset; ?>" title="<?php print $reset_long_text; ?>">
+        <div class="<?php print $class_reset; ?>">
+          <?php print $reset_short_text; ?>
+        </div>
+      </a>
+    <?php endif; ?>
   </div>
 <?php endif; ?>

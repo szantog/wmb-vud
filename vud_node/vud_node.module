@@ -302,10 +302,10 @@ function vud_node_link($type, $object, $teaser = FALSE) {
         $criteria += votingapi_current_user_identifier();
         $user_vote = votingapi_select_single_vote_value($criteria);
         if (!is_null($user_vote)) {
-          $reset_token = drupal_get_token("votereset/node/$node->nid/$tag");
+          $reset_token = drupal_get_token("votereset/node/$node->nid/$tag/$widget_theme");
           $links['vud_node_votes_reset_link'] = array(
             'title' => t('Reset your vote'),
-            'href'  => "votereset/node/$node->nid/$tag/$reset_token",
+            'href'  => "votereset/node/$node->nid/$tag/$widget_theme/$reset_token",
             'attributes' => array('rel' => 'nofollow'),
             'html'  => TRUE,
           );
