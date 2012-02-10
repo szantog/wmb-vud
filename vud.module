@@ -49,14 +49,6 @@ function vud_menu() {
     'file'             => 'vud.theme.inc',
   );
 
-  $items['user/%user/votes'] = array(
-    'title'            => 'Votes',
-    'page callback'    => 'vud_user_votes',
-    'page arguments'   => array(1),
-    'access arguments' => array('access vote up/down statistics'),
-    'type'             => MENU_LOCAL_TASK,
-  );
-
   $items['vud/%ctools_js/denied/%'] = array(
     'title'            => 'Vote denied',
     'page callback'    => 'vud_denied_vote',
@@ -165,45 +157,6 @@ function vud_permission() {
       'description' => t('Reset all of the Up/Down votes on the site'),
     ),
   );
-}
-
-/**
- * Menu callback; display all votes for a user.
- */
-function vud_user_votes() {
-  if ($account = user_load(array('uid' => arg(1), 'status' => 1))) {
-    if ($account->status || user_access('administer users')) {
-      $header = array(
-        array('data' => t('Node')),
-        array('data' => t('Vote')),
-        array('data' => t('Date'))
-      );
-      $sql = db_rewrite_sql("SELECT n.nid, n.title, v.value, v.timestamp FROM {node} n LEFT JOIN {votingapi_vote} v
-                             ON n.nid = v.entity_id
-                             WHERE v.uid = %d AND v.tag = '%s' AND v.entity_type = 'node' AND n.status = 1
-                             ORDER BY v.timestamp DESC");
-      $result = pager_query($sql, 25, 0, NULL, $account->uid, variable_get('vud_tag', 'vote'));
-      $rows = array();
-      while ($node = db_fetch_object($result)) {
-        $rows[] = array(
-          l($node->title, 'node/'. $node->nid),
-          $node->value,
-          t('!time ago', array('!time' => format_interval(time() - $node->timestamp)))
-        );
-      }
-      drupal_set_title(check_plain($account->name));
-      $output = theme('table', $header, $rows);
-      $output .= theme('pager', NULL, 25);
-
-      return $output;
-    }
-    else {
-      drupal_access_denied();
-    }
-  }
-  else {
-    drupal_not_found();
-  }
 }
 
 /**
