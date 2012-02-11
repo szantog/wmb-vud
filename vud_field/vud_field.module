@@ -173,3 +173,15 @@ function vud_field_field_formatter_view($entity_type, $entity, $field, $instance
 function theme_vud_field_formatter_default($variables) {
   return theme('vud_widget', $variables['vud_widget_variables']);
 }
+
+/**
+ * Implements hook_field_prepare_view().
+ */
+function vud_field_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  // If there is no values in $items, specify default value.
+  foreach ($entities as $id => $entity) {
+    if (empty($items[$id])) {
+      $items[$id][0] = _vud_field_load($field, NULL, $instances[$id]);
+    }
+  }
+}
