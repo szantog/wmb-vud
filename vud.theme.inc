@@ -197,7 +197,7 @@ function vud_widget_proxy($variables) {
 
       $up_access = $user_vote <= 0;
       $down_access = $user_vote >= 0;
-      $reset_active = vud_access_callback('reset vote up/down votes', $type, $entity_id, NULL, $tag);
+      $reset_access = ($user_vote != 0) && vud_access_callback('reset vote up/down votes', $type, $entity_id, NULL, $tag);
 
       if (!$up_access && !$down_access) {
         // Although implementing modules have requested a not readonly widget,
@@ -220,7 +220,7 @@ function vud_widget_proxy($variables) {
       $variables['class_down'] = 'down-inactive';
       $variables['show_down_as_link'] = TRUE;
     }
-    if ($up_access || $down_access) {
+    if ($reset_access) {
       $variables['show_reset'] = TRUE;
       $variables['class_reset'] = 'reset-active';
     }
@@ -239,7 +239,7 @@ function vud_widget_proxy($variables) {
       $variables['link_down'] = url("vote/$type/$entity_id/-1/$tag/$widget_theme/$token_down/nojs");
       $variables['link_class_down'] .= ' use-ajax';
     }
-    if ($up_access || $down_access) {
+    if ($reset_access) {
       $token_reset = drupal_get_token("votereset/$type/$entity_id/$tag/$widget_theme");
       $variables['link_reset'] = url("votereset/$type/$entity_id/$tag/$widget_theme/$token_reset");
       $variables['link_class_reset'] .= ' use-ajax';
