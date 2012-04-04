@@ -182,7 +182,7 @@ function vud_widget_proxy($variables) {
   // Define access per operation, for example when the vote up operation is
   // active this means the down operation should be allowed, as the up vote was
   // already.
-  $up_access = $down_access = FALSE;
+  $up_access = $down_access = $reset_access = FALSE;
   if (user_access('use vote up/down')) {
     $criteria = array(
       'entity_type' => $type,
