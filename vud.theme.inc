@@ -318,22 +318,20 @@ function vud_widget_proxy($variables) {
  * Proxy votes display function, that hook_theme() calls.
  */
 function vud_votes_proxy($variables) {
-  $plugin = vud_widget_get($widget_theme);
+  $plugin = vud_widget_get($variables['widget_theme']);
   if (empty($plugin) || empty($plugin['votes template'])) {
     return;
   }
 
   $template_file = $plugin['path'] . '/' . $plugin['votes template'] . $plugin['extension'];
-  $variables = array(
-    'plugin' => $plugin,
-    'id' => 'votes-' . $type . '-' . $entity_id,
-  );
+  $variables['plugin'] = $plugin;
+  $variables['id'] = 'votes-' . $variables['type'] . '-' . $variables['entity_id'];
 
   $criteria = array(
-    'entity_type' => $type,
-    'entity_id' => $entity_id,
+    'entity_type' => $variables['type'],
+    'entity_id' => $variables['entity_id'],
     'value_type' => 'points',
-    'tag' => $tag,
+    'tag' => $variables['tag'],
     'function' => 'sum'
   );
 
@@ -358,7 +356,7 @@ function vud_votes_proxy($variables) {
   vud_add_files('css', $plugin);  // Search and add the CSS files.
   vud_add_files('js', $plugin);   // Search and add the JS files.
 
-  $template_file = vud_pseudo_theming($type, 'votes', $plugin, $variables);
+  $template_file = vud_pseudo_theming($variables['type'], 'votes', $plugin, $variables);
 
   // not all widget use votes.tpl.php
   if (function_exists($plugin['render function'])) {
