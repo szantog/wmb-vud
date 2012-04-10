@@ -90,6 +90,8 @@ function vud_theme() {
  * We do this since we do not have standard theme overwrite because
  * is not possible to decide dinamically the path where the template is
  * located(in contrast with function names and template names).
+ *
+ * @fixme: Reimplement theme suggestions.
  */
 function vud_pseudo_theming($vote_entity, $template_type, $plugin, &$variables) {
   // let modules modify variables passed to the template
@@ -100,6 +102,9 @@ function vud_pseudo_theming($vote_entity, $template_type, $plugin, &$variables) 
     $function($template_type, $variables);
   }
 
+  // @fixme: Remove hardcode.
+  $template_file = $plugin['path'] . '/' . $plugin[$template_type . ' template'] . $plugin['extension'];
+  return $template_file;
   // and then provide template suggestions by hand
   $suggestions = module_invoke('vud_' . $vote_entity, 'template_suggestions', $template_type, $plugin, $variables['entity_id']);
   if (empty($suggestions)) {
@@ -113,12 +118,9 @@ function vud_pseudo_theming($vote_entity, $template_type, $plugin, &$variables) 
       $plugin['path'],
       dirname($current_theme->filename),
     );
-    // TODO: Fix this.
+    // @fixme: drupal_discover_template() was removed from core.
     //$template_file = drupal_find_theme_templates($paths, $suggestions, $plugin['extension']);
   }
-
-  // TODO: Remove hardcode.
-  $template_file = $plugin['path'] . '/' . $plugin['widget template'] . $plugin['extension'];
 
   return $template_file;
 }
